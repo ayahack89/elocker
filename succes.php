@@ -4,13 +4,16 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <?php include "cdn.php" ?>
     <title>Bootstrap demo</title>
     
   </head>
-  <body>
-  <div class="alert alert-success" role="alert">
-  <h4 class="alert-heading">Welcome! <?php 
+  <style>
+    <?php include "css/style.css" ?>
+  </style>
+  <body class="background text-light">
+  <div class="container py-5 px-5 col-md-6" role="alert">
+  <h1 class="text-success">Welcome! <?php 
   include "db_config.php";
   $username = $_SESSION['username'];
   $sql = "SELECT * FROM `storage` WHERE username = '$username'";
@@ -20,8 +23,8 @@
 
   }
 
-   ?></h4>
-  <p>Now you are succesfully register ! <br><br>
+   ?></h1>
+  <p><strong class="text-success">Now you are succesfully register !</strong> <br><br>
  <i>"We take great pride in offering a service that prioritizes trustworthiness and 
 exceptional customer care. Security is our main priority when it comes to managing sensitive information like passwords, 
 and we understand the significance of providing a reliable solution. Our commitment to trust begins with the 
@@ -32,6 +35,5 @@ information is handled by most careable enviorment."</i></p>
   <p class="mb-0">Now tap to <a href="index.php">LogIn</a> to create your new account : )</p>
 
 </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
