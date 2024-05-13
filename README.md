@@ -1,4 +1,4 @@
 # eLocker
-eLocker your secure password manager. 
-![Alt Text](image_url)
+<p>eLocker is your secure password manager. </p>
+![Desktop view](Screenshot (361).png)
 
