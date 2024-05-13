@@ -25,7 +25,7 @@
             <div class="card-body bg-dark">
               <a href="managepassword.php" class="nav-link">
               <h5 class="card-title">Manage password <i class="ri-tools-line"></i></h5>
-              <p class="card-text">Manage passwords to manage your passwords.</p>
+              <p class="card-text">Manage your passwords effortlessly with the built-in password management feature.</p>
               </a>
             </div>
           </div>
@@ -38,7 +38,7 @@
             <div class="card-body bg-dark">
               <a href="storenewpassword.php" class="nav-link">
               <h5 class="card-title">Store new password <i class="ri-file-lock-line"></i></h5>
-              <p class="card-text">Store new password to store new password.</p>
+              <p class="card-text">Safely store your new password in our secure database.</p>
               </a>
             </div>
           </div>
@@ -63,8 +63,8 @@
           <div class="card h-100 border-0 text-light">
             <div class="card-body bg-dark">
               <a href="contact.php" class="nav-link">
-              <h5 class="card-title">Contact <i class="ri-mail-line"></i></h5>
-              <p class="card-text">Contact to contact with us.</p>
+              <h5 class="card-title">Customer Support <i class="ri-contacts-line"></i></h5>
+              <p class="card-text">If you encounter any issues, please don't hesitate to email us.</p>
               </a>
             </div>
           </div>

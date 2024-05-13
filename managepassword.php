@@ -80,7 +80,12 @@ ini_set('display_errors', true);
                     echo '<tr>';
                     echo '<td><i class="ri-mail-line"></i> ' . $row['email'] . '</td>';
                     echo '<td><i class="ri-link-m"></i> ' . $row['links'] . '</td>';
-                    echo '<td><i class="ri-lock-2-line"></i> ' . $row['password'] . '</td>';
+                    echo '<td>
+                            
+                    <input type="password" value=' . $row['password'] . ' class="password-field bg-dark text-light" disabled>
+                    <i class="ri-eye-fill toggle-password"></i>
+                </div>
+            </td>';
                     echo '<td><a href="update.php?id=' . $row['id'] . '" style="text-decoration:none; color:white;"><i class="ri-edit-box-line"></i></a></td>';
                     echo '<td><a href="delete.php?delete=' . $row['id'] . '" style="text-decoration:none; color:white;"><i class="ri-delete-bin-line"></i></a></td>';
                     echo '</tr>';
@@ -162,6 +167,7 @@ ini_set('display_errors', true);
     <!-- Pagination --end -->
 
     <script>
+        //view
         document.addEventListener('DOMContentLoaded', function () {
             const togglePassword = document.querySelectorAll('.toggle-password');
             togglePassword.forEach(function (icon) {

@@ -12,7 +12,7 @@
   <body class="background text-light">
     <div class="container mt-5 mb-5 col-md-6">
     <div class="card mb-3 border-0">
-  <img class="card-img-top" src="contact-img.jpg" alt="Card image cap">
+  <img class="card-img-top" src="img/contact-img.jpg" alt="Card image cap">
   <div class="card-body bg-dark text-light">
     <h5 class="card-title">Elocker Support</h5>
     <p class="card-text">If you have any problem, any security issue or any query or complain please mail me on : <a href="mailto: ayanabhachatterjee@mail.com" class="nav-link">ayanabhachatterjee@gmail.com</a></p>
