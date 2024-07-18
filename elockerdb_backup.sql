@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: May 11, 2024 at 05:27 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Host: localhost:3306
+-- Generation Time: Jul 18, 2024 at 08:42 AM
+-- Server version: 10.5.20-MariaDB
+-- PHP Version: 7.3.33
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,8 +18,10 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `elocker`
+-- Database: `id21697119_elocker`
 --
+CREATE DATABASE IF NOT EXISTS `id21697119_elocker` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+USE `id21697119_elocker`;
 
 -- --------------------------------------------------------
 

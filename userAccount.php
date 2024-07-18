@@ -24,7 +24,7 @@
           <div class="card h-100 border-0 rounded text-light">
             <div class="card-body bg-dark">
               <a href="managepassword.php" class="nav-link">
-              <h5 class="card-title">Manage password <i class="ri-tools-line"></i></h5>
+              <h5 class="card-title">Manage Password <i class="ri-tools-line"></i></h5>
               <p class="card-text">Manage your passwords effortlessly with the built-in password management feature.</p>
               </a>
             </div>
@@ -37,7 +37,7 @@
           <div class="card h-100 border-0 rounded text-light">
             <div class="card-body bg-dark">
               <a href="storenewpassword.php" class="nav-link">
-              <h5 class="card-title">Store new password <i class="ri-file-lock-line"></i></h5>
+              <h5 class="card-title">Store New Password <i class="ri-database-2-line"></i></h5>
               <p class="card-text">Safely store your new password in our secure database.</p>
               </a>
             </div>
