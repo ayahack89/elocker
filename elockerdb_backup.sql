@@ -20,8 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `id21697119_elocker`
 --
-CREATE DATABASE IF NOT EXISTS `id21697119_elocker` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
-USE `id21697119_elocker`;
+CREATE DATABASE IF NOT EXISTS `if0_37067260_selocker` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+USE `if0_37067260_selocker`;
 
 -- --------------------------------------------------------
 
