@@ -1,2 +1,1 @@
-# eLocker
-eLocker your secure password manager. 
+ELocker, your secure password manager. 
