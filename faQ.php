@@ -1,97 +1,88 @@
+<?php
+session_start();
+
+// Security Check: If the user is not logged in, redirect them to the login page.
+if (!isset($_SESSION['username'])) {
+    header('Location: index.php');
+    exit();
+}
+?>
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <?php include "cdn.php" ?>
+    <?php include "include/cdn.php"; ?>
+    <link rel="stylesheet" href="css/style.css">
     <title>Elocker - FAQ</title>
-  </head>
-  <style>
-    <?php include "css/style.css" ?>
-  </style>
-  <body class="background text-light">
-  <!-- <div class="container border rounded-bottom">
-  <div style="display:flex;  padding:20px; width:1100px; margin:auto;" class="bg-primary rounded-bottom shadow-sm">
-    <a class="btn btn-lg bg-primary border" href="userAccount.php" role="button" style=" color:whitesmoke;margin-left:10px;">&larr;</a>
-    <a class="btn btn-lg bg-primary" href="logout.php" role="button" style=" color:whitesmoke;margin-left:10px;">Logout</a>
-    </div> -->
-  <div class="accordion accordion-flush container shadow-sm p-4 rounded-bottom" id="accordionFlushExample">
-     <h3>FAQ</h3>
-     <p>Any doubts? Read the answers given below.</p>
-  <div class="accordion-item border-0">
-    <h2 class="accordion-header" id="flush-headingOne" >
-      <button class="accordion-button collapsed bg-dark text-light" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne"  style="background-color:whitesmoke;">
-      How to use Elocker to manage passwords?
-      </button>
-    </h2>
-    <div id="flush-collapseOne" class="accordion-collapse collapse bg-dark text-light" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
-      <div class="accordion-body">
-     <p>After login succesfully, you will be redirected to your personalized dashboard.
-          There are many options to manage your passwords.
-     </p>
-      <h6>Store New Password:</h6>
-<p>Click on "Store New Password" to securely save your passwords.
-Fill in the provided form with the necessary details.
-Submit the form, and your password will be securely stored.</p>
+</head>
+<body class="background text-light">
 
-<h6>Manage Passwords:</h6>
+    <?php include "include/navbar.php"; ?>
 
-<p>Click on "Manage Passwords" to view and manage your stored passwords.
-The table displays your passwords, and you can <br>
-Edit: Modify or update your password information.<br>
-Delete: Safely remove passwords which is no longer need.<br>
-Search: Utilize the search function to quickly find specific passwords</p>
-      </div>
-    </div>
-  </div>
-  <div class="accordion-item border-0">
-    <h2 class="accordion-header" id="flush-headingTwo">
-      <button class="accordion-button collapsed bg-dark text-light" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo" style="background-color:whitesmoke;">
-      Is Elocker safe?
-      </button>
-    </h2>
-    <div id="flush-collapseTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo" data-bs-parent="#accordionFlushExample">
-      <div class="accordion-body bg-dark text-light">
-      <h5>Your Security Matters</h5>
-          <p>We prioritize the security of your data.
-Passwords are encrypted for enhanced protection.
-If you encounter any issues, our support team is ready to help.</p>
-  
+    <main class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="login-card">
+                    <div class="login-header">
+                        <h2>Frequently Asked Questions</h2>
+                        <p>Find answers to common questions about Elocker.</p>
+                    </div>
 
-      </div>
-    </div>
-  </div>
-  <div class="accordion-item border-0">
-    <h2 class="accordion-header" id="flush-headingThree">
-      <button class="accordion-button collapsed bg-dark text-light" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree" aria-expanded="false" aria-controls="flush-collapseThree" style="background-color:whitesmoke;">
-        If I have anyother issues, what can I do for?
-      </button>
-    </h2>
-    <div id="flush-collapseThree" class="accordion-collapse collapse" aria-labelledby="flush-headingThree" data-bs-parent="#accordionFlushExample">
-      <div class="accordion-body bg-dark text-light">
-      <h5>Contact Support:</h5>
-<p>For any other problems or security issue and inquiries, click on <a href="contact.php">Contact Support</a>.
-Reach out to us via the provided email address, and our team will promptly assist you.</p>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- <div class="container">
-  <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
-    <div class="col-md-4 d-flex align-items-center">
-      <a href="/" class="mb-3 me-2 mb-md-0 text-muted text-decoration-none lh-1">
-        <svg class="bi" width="30" height="24"><use xlink:href="#bootstrap"></use></svg>
-      </a>
-      <span class="mb-3 mb-md-0 text-muted">© 2023 Elocker, Inc</span>
-    </div>
+                    <div class="accordion accordion-flush" id="faqAccordion">
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="flush-headingOne">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                                    How do I use Elocker to manage passwords?
+                                </button>
+                            </h2>
+                            <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <p>After logging in, you will land on your personal dashboard with several options:</p>
+                                    <h6>Store New Password:</h6>
+                                    <p>Click this option to securely save new login credentials. Fill in the form and submit it to add the entry to your vault.</p>
+                                    <h6>Manage Passwords:</h6>
+                                    <p>Here you can view all your stored passwords. You can easily <strong>Edit</strong>, <strong>Delete</strong>, or <strong>Search</strong> for specific entries to keep everything organized.</p>
+                                </div>
+                            </div>
+                        </div>
 
-    <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
-      <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#twitter"></use></svg></a></li>
-      <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#instagram"></use></svg></a></li>
-      <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#facebook"></use></svg></a></li>
-    </ul>
-  </footer>
-</div>
-  </div> -->
-  </body>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="flush-headingTwo">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
+                                    Is my data safe with Elocker?
+                                </button>
+                            </h2>
+                            <div id="flush-collapseTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <h5>Yes, your security is our top priority.</h5>
+                                    <p>All passwords you store are protected with strong <strong>AES-256-CBC encryption</strong> before they are saved in our database. This means your sensitive information is unreadable to anyone without the secret key. We are committed to providing a secure and trustworthy environment for your data.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="flush-headingThree">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree" aria-expanded="false" aria-controls="flush-collapseThree">
+                                    What if I have other issues or questions?
+                                </button>
+                            </h2>
+                            <div id="flush-collapseThree" class="accordion-collapse collapse" aria-labelledby="flush-headingThree" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <h5>We're here to help.</h5>
+                                    <p>For any other problems, security concerns, or inquiries, please navigate to the <a href="contact.php" class="faq-link">Customer Support</a> page from your dashboard. Our team will promptly assist you with any issues you may have.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="back-link">
+                        <a href="userAccount.php"><i class="ri-arrow-left-line"></i> Back to Dashboard</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
 </html>

@@ -1,7 +1,737 @@
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Libertinus+Sans:ital,wght@0,400;0,700;1,400&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+
+/* --- Variable Definitions --- */
 :root {
-     --background: #18181b;
-   }
- 
-   .background {
-     background-color: var(--background);
-   }
+    --bg-color: #121212;
+    --card-color: #1e1e1e;
+    --primary-color: #007bff;
+    --primary-hover-color: #0056b3;
+    --success-color: #28a745;
+    --text-color: #e0e0e0;
+    --text-muted: #8c8c8c;
+    --border-color: #333333;
+    --input-bg-color: #2a2a2a;
+    --input-disabled-bg: #222222;
+    --table-row-hover-bg: #2c2c2c;
+}
+
+/* --- General Body Styles --- */
+body {
+    font-family: "Ubuntu", sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+/* --- Login/Register/Success Page Specific Centering --- */
+body:has(.login-container) {
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* --- Login/Register Container & Card --- */
+.login-container {
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+}
+
+.login-card {
+    background-color: var(--card-color);
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.login-header h2 {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.login-header p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* --- Form Elements --- */
+.login-form .form-control,
+.form-control {
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    height: 50px;
+}
+
+.login-form .form-control:focus,
+.form-control:focus {
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+    box-shadow: 0 0 0 2px var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.login-form .input-group-text {
+    background-color: var(--input-bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    border-right: none;
+    padding: 0.75rem 1rem;
+    border-radius: 8px 0 0 8px;
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+}
+
+/* --- Button Styles --- */
+.btn-primary {
+    background-color: var(--primary-color);
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-weight: 500;
+    transition: background-color 0.2s ease-in-out;
+    margin-top: 10px;
+    text-decoration: none;
+    display: inline-block;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover-color);
+    color: #fff;
+}
+
+.btn-primary i {
+    vertical-align: middle;
+}
+
+/* --- Login/Register Link --- */
+.register-link {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.register-link a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.register-link a:hover {
+    color: #4da3ff;
+    text-decoration: underline;
+}
+
+/* --- Alert Box --- */
+.alert { 
+    font-size: 0.9rem;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+/* --- Styles for Success Page --- */
+.success-icon {
+    color: var(--success-color);
+    font-size: 4.5rem;
+    line-height: 1;
+    margin-bottom: 15px;
+}
+
+.success-note {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-top: -15px;
+    margin-bottom: 20px;
+}
+
+/* --- Styles for UserAccount.php (Dashboard) --- */
+.dashboard-header h1 {
+    font-weight: 600;
+    font-size: 2.5rem;
+}
+.dashboard-header-sub{
+  color: var(--text-muted);
+}
+
+.dashboard-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: var(--card-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 30px;
+    height: 100%;
+    text-decoration: none;
+    color: var(--text-color);
+}
+
+.dashboard-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 46, 96, 0.1);
+    color: var(--text-color);
+    background-color: #222121;
+}
+
+.dashboard-card .card-icon {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.dashboard-card .card-title {
+    font-weight: 500;
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+}
+
+.dashboard-card .card-text {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* --- Styles for storenewpassword.php forms --- */
+.form-label {
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.form-label i {
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.form-control:disabled {
+    background-color: var(--input-disabled-bg);
+    color: var(--text-muted);
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.back-link {
+    text-align: center;
+    margin-top: 25px;
+}
+
+.back-link a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+}
+
+.back-link a:hover {
+    color: var(--primary-color);
+}
+
+.back-link i {
+    vertical-align: middle;
+    margin-right: 2px;
+}
+
+/* --- Styles for FAQ.php Accordion --- */
+.accordion-item {
+    background-color: transparent;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.accordion-item:first-of-type {
+    border-top: 1px solid var(--border-color);
+}
+
+.accordion-button {
+    background-color: transparent;
+    color: var(--text-color);
+    font-weight: 500;
+    padding: 1.25rem 1.5rem;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: var(--input-disabled-bg);
+    color: var(--primary-color);
+    box-shadow: none;
+}
+
+.accordion-button:focus {
+    box-shadow: 0 0 0 2px var(--primary-color);
+    border-radius: 3px;
+    z-index: 5;
+}
+
+.accordion-button::after {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23e0e0e0'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    transition: transform 0.2s ease-in-out;
+}
+
+.accordion-button:not(.collapsed)::after {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23007bff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+
+.accordion-body {
+    background-color: var(--card-color);
+    color: var(--text-muted);
+    padding: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.accordion-body h6 {
+    color: var(--text-color);
+    font-weight: 600;
+    margin-top: 1rem;
+}
+
+.faq-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.faq-link:hover {
+    color: #4da3ff;
+    text-decoration: underline;
+}
+
+/* --- Styles for Contact.php --- */
+.contact-icon {
+    color: var(--primary-color);
+    font-size: 4.5rem;
+    line-height: 1;
+    margin-bottom: 15px;
+}
+
+.contact-info p {
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+
+.contact-email-link {
+    display: inline-block;
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    text-decoration: none;
+    font-weight: 500;
+    margin: 10px 0;
+    transition: all 0.2s ease-in-out;
+}
+
+.contact-email-link:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
+}
+
+.contact-signature {
+    margin-top: 20px;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+/*
+=====================================================
+--- STYLES FOR MANAGEPASSWORD.PHP (SCRATCH BUILT) ---
+=====================================================
+*/
+
+/* --- Control Bar (Search & Add) --- */
+.control-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.search-form {
+    flex-grow: 1;
+    position: relative;
+}
+
+.search-form .search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1.2rem;
+}
+
+.search-form .form-control {
+    padding-left: 40px;
+    height: 50px;
+    border-radius: 50px;
+}
+
+.add-new-btn {
+    margin-top: 0;
+    white-space: nowrap;
+}
+
+/* --- Custom Table (Built with Divs) --- */
+.custom-table {
+    background-color: var(--card-color);
+    border-radius: 12px;
+    padding: 0.5rem 1.5rem 1.5rem 1.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+}
+
+.custom-table-header,
+.custom-table-row {
+    display: grid;
+    grid-template-columns: 2.5fr 2.5fr 1.5fr 1fr; /* Adjusted column widths */
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem 0;
+}
+
+.custom-table-header {
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.custom-table-body .custom-table-row {
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+}
+
+.custom-table-body .custom-table-row:last-child {
+    border-bottom: none;
+}
+
+.custom-table-body .custom-table-row:hover {
+    background-color: var(--table-row-hover-bg);
+}
+
+.table-cell {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+}
+
+.truncate-cell {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.table-cell[data-label="Account"] {
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.table-cell a {
+    color: var(--primary-color);
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.table-cell a:hover {
+    text-decoration: underline;
+}
+
+.no-data-cell {
+    padding: 3rem 1.5rem;
+    color: var(--text-muted);
+    text-align: center;
+    font-size: 1.1rem;
+}
+.no-data-cell i {
+    margin-right: 0.5rem;
+}
+
+/* --- Password Cell and Actions --- */
+.password-cell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.password-field {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+    flex-grow: 1;
+    padding: 0;
+    pointer-events: none;
+    font-size: 1rem;
+    min-width: 0; /* Fix for flexbox overflow */
+}
+
+.password-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-shrink: 0; /* Prevents icons from being squished */
+    padding-left: 10px; /* Space between password dots and icons */
+}
+
+.password-actions i {
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    transition: color 0.2s ease;
+}
+
+.password-actions i:hover {
+    color: var(--primary-color);
+}
+
+.actions-cell {
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.action-icon {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 1.3rem;
+    transition: color 0.2s ease;
+}
+
+.action-icon:hover {
+    color: var(--primary-color);
+}
+
+.action-icon-delete:hover {
+    color: #dc3545;
+}
+
+/* --- Pagination --- */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+.pagination {
+    --bs-pagination-bg: var(--input-bg-color);
+    --bs-pagination-border-color: var(--border-color);
+    --bs-pagination-color: var(--text-muted);
+    --bs-pagination-hover-bg: var(--input-disabled-bg);
+    --bs-pagination-hover-color: var(--text-color);
+    --bs-pagination-hover-border-color: var(--border-color);
+    --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+    --bs-pagination-active-bg: var(--primary-color);
+    --bs-pagination-active-border-color: var(--primary-color);
+    --bs-pagination-active-color: #fff;
+    --bs-pagination-disabled-bg: var(--input-disabled-bg);
+    --bs-pagination-disabled-border-color: var(--border-color);
+}
+
+/* --- Responsive Adjustments for Custom Table --- */
+@media (max-width: 768px) {
+    .custom-table-header {
+        display: none;
+    }
+    .custom-table-body .custom-table-row {
+        display: block;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        margin-bottom: 1rem;
+    }
+    .custom-table-body .custom-table-row:last-child {
+        margin-bottom: 0;
+    }
+    .custom-table-body .custom-table-row:hover {
+        border-color: var(--primary-color);
+        background-color: transparent;
+    }
+    .table-cell {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .table-cell:last-child {
+        border-bottom: none;
+    }
+    .table-cell::before {
+        content: attr(data-label);
+        font-weight: 500;
+        color: var(--text-color);
+        margin-right: 1rem;
+    }
+    .actions-cell {
+        justify-content: flex-end;
+    }
+}
+/*
+=====================================================
+--- STYLES FOR UPDATE.PHP PASSWORD TOGGLE ---
+=====================================================
+*/
+
+.password-cell-form {
+    position: relative;
+}
+
+.toggle-password-form {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: color 0.2s ease;
+}
+
+.toggle-password-form:hover {
+    color: var(--primary-color);
+}
+
+/*
+=====================================================
+--- STYLES FOR NAVBAR ---
+=====================================================
+*/
+
+.custom-navbar {
+    background-color: var(--card-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 70px;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s ease;
+}
+
+.navbar-brand:hover {
+    color: var(--primary-color);
+}
+
+.navbar-brand i {
+    color: var(--primary-color);
+    font-size: 1.8rem;
+    vertical-align: middle;
+}
+
+.navbar-menu {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.navbar-user {
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+.navbar-user span {
+    color: var(--text-color);
+}
+
+.navbar-logout {
+    color: var(--text-muted);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.navbar-logout:hover {
+    background-color: var(--input-disabled-bg);
+    color: #dc3545; /* Red on hover for logout */
+}
+
+/* --- Mobile Menu Toggle (Hamburger) --- */
+.navbar-toggle {
+    display: none; /* Hidden on desktop */
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 1.8rem;
+    cursor: pointer;
+}
+
+/* --- Responsive Styles for Mobile --- */
+@media (max-width: 768px) {
+    .navbar-toggle {
+        display: block; /* Show on mobile */
+    }
+
+    .navbar-menu {
+        display: none; /* Hide menu by default on mobile */
+        position: absolute;
+        top: 70px;
+        left: 0;
+        right: 0;
+        width: 100%;
+        background-color: var(--card-color);
+        border-bottom: 1px solid var(--border-color);
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+        box-shadow: 0 10px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .navbar-menu.is-active {
+        display: flex; /* Show menu when active */
+    }
+
+    .navbar-user, .navbar-logout {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .navbar-logout:hover {
+        background-color: var(--input-disabled-bg);
+    }
+}

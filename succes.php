@@ -1,39 +1,64 @@
-<?php session_start(); ?>
+<?php
+session_start();
+
+// If the user lands on this page without having a username in the session,
+// redirect them to the registration page. This prevents direct access.
+if (!isset($_SESSION['username'])) {
+    header('Location: register.php');
+    exit();
+}
+
+// Get the username from the session and sanitize it for safe display.
+$username = htmlspecialchars($_SESSION['username']);
+
+// Unset the session variable after displaying it, so the message is only shown once.
+// You can remove this line if you want the user to be able to refresh the success page.
+// unset($_SESSION['username']);
+
+?>
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <?php include "cdn.php" ?>
-    <title>Bootstrap demo</title>
-    
-  </head>
-  <style>
-    <?php include "css/style.css" ?>
-  </style>
-  <body class="background text-light">
-  <div class="container py-5 px-5 col-md-6" role="alert">
-  <h1 class="text-success">Welcome! <?php 
-  include "db_config.php";
-  $username = $_SESSION['username'];
-  $sql = "SELECT * FROM `storage` WHERE username = '$username'";
-  $result = mysqli_query($conn, $sql);
-  if($result){
-    echo $_SESSION['username'];
+    <?php include "include/cdn.php"; ?>
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Your CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <title>Elocker - Registration Successful</title>
+</head>
 
-  }
+<body class="background text-light">
 
-   ?></h1>
-  <p><strong class="text-success">Now you are succesfully register !</strong> <br><br>
- <i>"We take great pride in offering a service that prioritizes trustworthiness and 
-exceptional customer care. Security is our main priority when it comes to managing sensitive information like passwords, 
-and we understand the significance of providing a reliable solution. Our commitment to trust begins with the 
-implementation of robust <b>encryption</b> protocols and <b>advanced security</b> features to safeguard your valuable data. 
-We create a platform where users can confidently trust us with their passwords, knowing that their 
-information is handled by most careable enviorment."</i></p>
-  <hr>
-  <p class="mb-0">Now tap to <a href="index.php">LogIn</a> to create your new account : )</p>
+    <div class="login-container">
+        <div class="login-card text-center">
+            <!-- Success Icon -->
+            <div class="success-icon">
+                <i class="ri-checkbox-circle-line"></i>
+            </div>
 
-</div>
-  </body>
+            <!-- Header -->
+            <div class="login-header">
+                <h2>Registration Successful!</h2>
+                <p>Welcome to Elocker, <strong><?php echo $username; ?></strong>!</p>
+            </div>
+
+            <!-- Informational Text -->
+            <p class="success-note">
+                Your account has been created securely. We are committed to protecting your data with robust encryption and advanced security features.
+            </p>
+
+            <!-- Action Button -->
+            <a href="index.php" class="btn btn-primary w-100 mt-4">
+                Proceed to Log In <i class="ri-arrow-right-line"></i>
+            </a>
+        </div>
+    </div>
+
+</body>
+
 </html>

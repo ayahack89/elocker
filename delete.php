@@ -1,5 +1,5 @@
 <?php 
-include "db_config.php";
+include "server/db_config.php";
 $delete_id = $_GET['delete'];
 $sql = "DELETE FROM `storage` WHERE id = {$delete_id}";
 if(mysqli_query($conn, $sql)){

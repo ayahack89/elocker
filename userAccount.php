@@ -1,83 +1,72 @@
-<?php session_start(); ?>
+<?php
+session_start();
+
+// Security Check: If the user is not logged in, redirect them to the login page.
+if (!isset($_SESSION['username'])) {
+    header('Location: index.php');
+    exit();
+}
+
+// Get the username from the session and sanitize it for safe display.
+$username = htmlspecialchars($_SESSION['username']);
+?>
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <?php include "cdn.php" ?>
-    <title>Elocker - your secure password manager</title>
-  </head>
-  <style>
-    <?php include "css/style.css" ?>
-  </style>
-  <body class="background text-light">
+    <?php include "include/cdn.php"; ?>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Elocker - Dashboard</title>
+</head>
+<body class="background text-light">
 
-  <!-- Navbar -start  -->
- <?php include "navbar.php" ?>
-<!-- Nabvar -end  -->
-<section class="container-fluid py-5">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="row row-cols-1 row-cols-md-2 g-4">
-        <!-- Card -start  -->
-        <div class="col">
-          <div class="card h-100 border-0 rounded text-light">
-            <div class="card-body bg-dark">
-              <a href="managepassword.php" class="nav-link">
-              <h5 class="card-title">Manage Password <i class="ri-tools-line"></i></h5>
-              <p class="card-text">Manage your passwords effortlessly with the built-in password management feature.</p>
-              </a>
-            </div>
-          </div>
+    <?php include "include/navbar.php"; ?>
+    <main class="container py-5">
+        <div class="dashboard-header mb-5">
+            <h1>Welcome, <?php echo $username; ?>!</h1>
+            <p class="dashboard-header-sub">This is your secure dashboard. Manage your passwords and settings from here.</p>
         </div>
-        <!-- Card -end  -->
 
-        <!-- Card -start  -->
-        <div class="col">
-          <div class="card h-100 border-0 rounded text-light">
-            <div class="card-body bg-dark">
-              <a href="storenewpassword.php" class="nav-link">
-              <h5 class="card-title">Store New Password <i class="ri-database-2-line"></i></h5>
-              <p class="card-text">Safely store your new password in our secure database.</p>
-              </a>
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            
+            <div class="col">
+                <a href="managepassword.php" class="dashboard-card">
+                    <div class="card-icon"><i class="ri-shield-keyhole-line"></i></div>
+                    <h5 class="card-title">Manage Passwords</h5>
+                    <p class="card-text">View, edit, and organize your saved passwords.</p>
+                </a>
             </div>
-          </div>
-        </div>
-        <!-- Card -end  -->
 
-        <!-- Card -start  -->
-        <div class="col">
-          <div class="card h-100 border-0 rounded text-light">
-            <div class="card-body bg-dark">
-              <a href="faQ.php" class="nav-link">
-              <h5 class="card-title">FAQ <i class="ri-questionnaire-line"></i></h5>
-              <p class="card-text">FAQ to clear your doubts.</p>
-              </a>
+            <div class="col">
+                <a href="storenewpassword.php" class="dashboard-card">
+                    <div class="card-icon"><i class="ri-database-2-line"></i></div>
+                    <h5 class="card-title">Store New Password</h5>
+                    <p class="card-text">Safely store a new password in our secure database.</p>
+                </a>
             </div>
-          </div>
-        </div>
-        <!-- Card -end  -->
 
-        <!-- Card -start  -->
-        <div class="col">
-          <div class="card h-100 border-0 text-light">
-            <div class="card-body bg-dark">
-              <a href="contact.php" class="nav-link">
-              <h5 class="card-title">Customer Support <i class="ri-contacts-line"></i></h5>
-              <p class="card-text">If you encounter any issues, please don't hesitate to email us.</p>
-              </a>
+            <div class="col">
+                <a href="faQ.php" class="dashboard-card">
+                    <div class="card-icon"><i class="ri-questionnaire-line"></i></div>
+                    <h5 class="card-title">FAQ</h5>
+                    <p class="card-text">Have questions? Find answers to clear your doubts.</p>
+                </a>
             </div>
-          </div>
+
+            <div class="col">
+                <a href="contact.php" class="dashboard-card">
+                    <div class="card-icon"><i class="ri-customer-service-2-line"></i></div>
+                    <h5 class="card-title">Customer Support</h5>
+                    <p class="card-text">Encounter an issue? Don't hesitate to email us.</p>
+                </a>
+            </div>
+
         </div>
-        <!-- Card -end  -->
+    </main>
 
-        <!-- Repeat the card structure for other cards -->
-      </div>
-    </div>
-  </div>
-</section>
-
-
-
-  </body>
+</body>
 </html>

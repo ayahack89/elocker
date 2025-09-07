@@ -1,24 +1,52 @@
+<?php
+session_start();
+
+// Security Check: If the user is not logged in, redirect them to the login page.
+if (!isset($_SESSION['username'])) {
+    header('Location: index.php');
+    exit();
+}
+?>
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <?php include "cdn.php" ?>
-    <title>Elocker - contact support</title>
-  </head>
-  <style>
-    <?php include "css/style.css" ?>
-  </style>
-  <body class="background text-light">
-    <div class="container mt-5 mb-5 col-md-6">
-    <div class="card mb-3 border-0">
-  <img class="card-img-top" src="img/contact-img.jpg" alt="Card image cap">
-  <div class="card-body bg-dark text-light">
-    <h5 class="card-title">Elocker Support</h5>
-    <p class="card-text">If you have any problem, any security issue or any query or complain please mail me on : <a href="mailto: ayanabhachatterjee@mail.com" class="nav-link">ayanabhachatterjee@gmail.com</a></p>
-    <p class="card-text"><small class="text-muted">- Ayanabha Chatterjee</small></p>
-  </div>
-</div>
-    </div>
-  </body>
+    <?php include "include/cdn.php"; ?>
+    <link rel="stylesheet" href="css/style.css">
+    <title>Elocker - Contact Support</title>
+</head>
+<body class="background text-light">
+
+    <?php include "include/navbar.php"; ?>
+
+    <main class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="login-card text-center">
+
+                    <div class="contact-icon">
+                        <i class="ri-customer-service-2-line"></i>
+                    </div>
+
+                    <div class="login-header">
+                        <h2>Contact Support</h2>
+                        <p>We're here to help with any questions or issues you may have.</p>
+                    </div>
+
+                    <div class="contact-info">
+                        <p>For any problems, security concerns, or other inquiries, please send an email to:</p>
+                        <a href="mailto:ayanabhachatterjee@gmail.com" class="contact-email-link">ayanabhachatterjee@gmail.com</a>
+                        <p class="contact-signature">- Ayanabha Chatterjee</p>
+                    </div>
+
+                    <p class="back-link">
+                        <a href="userAccount.php"><i class="ri-arrow-left-line"></i> Back to Dashboard</a>
+                    </p>
+
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
 </html>
