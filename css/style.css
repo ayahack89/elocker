@@ -207,6 +207,107 @@ body:has(.login-container) {
     line-height: 1.5;
 }
 
+
+/* --- Login/Register Container & Card --- */
+.login-container {
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+}
+
+.login-card {
+    background-color: var(--card-color);
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.login-header h2 {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.login-header p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* --- Form Elements --- */
+.login-form .form-control,
+.form-control {
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    height: 50px;
+}
+
+.login-form .form-control:focus,
+.form-control:focus {
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+    box-shadow: 0 0 0 2px var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.login-form .input-group-text {
+    background-color: var(--input-bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    border-right: none;
+    padding: 0.75rem 1rem;
+    border-radius: 8px 0 0 8px;
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+}
+
+/* --- Button Styles --- */
+.btn-primary {
+    background-color: var(--primary-color);
+    border: none;
+    color: #fff;
+}
+.btn-primary:hover {
+    background-color: var(--primary-hover-color);
+    color: #fff;
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+}
+.btn-secondary:hover {
+    background-color: var(--secondary-hover-color);
+    border-color: var(--text-muted);
+    color: var(--text-color);
+}
+
+/* Common button styles */
+.btn-primary, .btn-secondary {
+    border-radius: 8px;
+    padding: 12px;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+    margin-top: 10px;
+    text-decoration: none;
+    display: inline-block;
+}
+.btn-primary i, .btn-secondary i {
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
 /* --- Styles for storenewpassword.php forms --- */
 .form-label {
     font-weight: 500;
@@ -348,12 +449,6 @@ body:has(.login-container) {
     font-size: 0.9rem;
 }
 
-/*
-=====================================================
---- STYLES FOR MANAGEPASSWORD.PHP (SCRATCH BUILT) ---
-=====================================================
-*/
-
 /* --- Control Bar (Search & Add) --- */
 .control-bar {
     display: flex;
@@ -367,6 +462,7 @@ body:has(.login-container) {
 .search-form {
     flex-grow: 1;
     position: relative;
+    min-width: 200px;
 }
 
 .search-form .search-icon {
@@ -376,6 +472,7 @@ body:has(.login-container) {
     transform: translateY(-50%);
     color: var(--text-muted);
     font-size: 1.2rem;
+    z-index: 2;
 }
 
 .search-form .form-control {
@@ -396,12 +493,13 @@ body:has(.login-container) {
     padding: 0.5rem 1.5rem 1.5rem 1.5rem;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     border: 1px solid var(--border-color);
+    overflow: hidden;
 }
 
 .custom-table-header,
 .custom-table-row {
     display: grid;
-    grid-template-columns: 2.5fr 2.5fr 1.5fr 1fr; /* Adjusted column widths */
+    grid-template-columns: 2.5fr 2.5fr 1.5fr 1fr;
     gap: 1rem;
     align-items: center;
     padding: 1rem 0;
@@ -486,14 +584,16 @@ body:has(.login-container) {
     padding: 0;
     pointer-events: none;
     font-size: 1rem;
-    min-width: 0; /* Fix for flexbox overflow */
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .password-actions {
     display: flex;
     gap: 0.75rem;
-    flex-shrink: 0; /* Prevents icons from being squished */
-    padding-left: 10px; /* Space between password dots and icons */
+    flex-shrink: 0;
+    padding-left: 10px;
 }
 
 .password-actions i {
@@ -548,42 +648,124 @@ body:has(.login-container) {
     --bs-pagination-disabled-border-color: var(--border-color);
 }
 
-/* --- Responsive Adjustments for Custom Table --- */
+/*
+=====================================================
+--- REVAMPED MOBILE UI FOR MANAGEPASSWORDS.PHP ---
+=====================================================
+*/
 @media (max-width: 768px) {
+    .control-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-form {
+        min-width: 100%;
+        order: 2;
+    }
+    
+    .add-new-btn {
+        order: 1;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .custom-table {
+        padding: 0.5rem 1rem 1rem 1rem;
+    }
+    
     .custom-table-header {
         display: none;
     }
+    
     .custom-table-body .custom-table-row {
-        display: block;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
         border: 1px solid var(--border-color);
+        border-radius: 12px;
         margin-bottom: 1rem;
+        background-color: var(--card-color);
+        gap: 0.75rem;
     }
+    
     .custom-table-body .custom-table-row:last-child {
         margin-bottom: 0;
     }
-    .custom-table-body .custom-table-row:hover {
-        border-color: var(--primary-color);
-        background-color: transparent;
-    }
+    
     .table-cell {
-        display: flex;
-        justify-content: space-between;
-        padding: 0.75rem 0;
+        display: grid;
+        grid-template-columns: 80px 1fr;
+        gap: 0.75rem;
+        align-items: center;
+        padding: 0.5rem 0;
         border-bottom: 1px solid var(--border-color);
+        word-break: break-word;
+        width: 100%;
     }
+    
     .table-cell:last-child {
         border-bottom: none;
+        padding-bottom: 0;
     }
+    
     .table-cell::before {
         content: attr(data-label);
-        font-weight: 500;
-        color: var(--text-color);
-        margin-right: 1rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: 0.85rem;
     }
+    
+    /* Password cell adjustments */
+    .password-cell {
+        flex-wrap: wrap;
+    }
+    
+    .password-field {
+        flex-basis: calc(100% - 60px);
+    }
+    
+    /* Full-width and right-aligned actions cell */
     .actions-cell {
+        display: flex;
         justify-content: flex-end;
+        padding-top: 0.5rem;
+        border-top: 1px dashed var(--border-color);
+        margin-top: 0.5rem;
+        width: 100%;
+    }
+    
+    .actions-cell::before {
+        display: none; /* Hide the "Actions" label */
+    }
+    
+    /* Make sure URLs break properly */
+    .table-cell a {
+        word-break: break-all;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+    .table-cell {
+        grid-template-columns: 70px 1fr;
+        gap: 0.5rem;
+    }
+    
+    .table-cell::before {
+        font-size: 0.8rem;
+    }
+    
+    .password-actions {
+        gap: 0.5rem;
+    }
+    
+    .password-actions i {
+        font-size: 1.1rem;
+    }
+    
+    .action-icon {
+        font-size: 1.2rem;
     }
 }
 /*
@@ -639,7 +821,7 @@ body:has(.login-container) {
 .navbar-brand {
     font-size: 1.5rem;
     font-weight: 600;
-    color: var(--text-color);
+    color: var(--primary-color);
     text-decoration: none;
     display: flex;
     align-items: center;

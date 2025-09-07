@@ -38,7 +38,6 @@ if (isset($_POST['submit'])) {
             $password_hash = password_hash($password, PASSWORD_BCRYPT);
 
             // Insert new user using a prepared statement
-            // NOTE: Only store the actual password hash, NOT the re-typed one.
             $sql_insert = "INSERT INTO `register` (username, password) VALUES (?, ?)";
             $stmt_insert = mysqli_prepare($conn, $sql_insert);
             mysqli_stmt_bind_param($stmt_insert, "ss", $username, $password_hash);
@@ -81,7 +80,6 @@ if (isset($_POST['submit'])) {
             <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post" class="login-form">
 
                 <?php
-                // Display message here if it exists
                 if (!empty($message)) {
                     echo '<div class="alert ' . $message_type . '" role="alert">' . $message . '</div>';
                 }
@@ -94,13 +92,17 @@ if (isset($_POST['submit'])) {
 
                 <div class="input-group mb-3">
                     <span class="input-group-text"><i class="ri-lock-password-line"></i></span>
-                    <input type="password" name="password" class="form-control" placeholder="Password (min. 8 characters)" aria-label="Password" required>
+                    <input type="password" name="password" id="password-field" class="form-control" placeholder="Password (min. 8 characters)" aria-label="Password" required>
                 </div>
                 
                 <div class="input-group mb-4">
                     <span class="input-group-text"><i class="ri-lock-password-line"></i></span>
-                    <input type="password" name="repass" class="form-control" placeholder="Confirm Password" aria-label="Confirm Password" required>
+                    <input type="password" name="repass" id="repass-field" class="form-control" placeholder="Confirm Password" aria-label="Confirm Password" required>
                 </div>
+
+                <button type="button" class="btn btn-secondary w-100 mb-3" id="generate-password-btn">
+                    <i class="ri-magic-line"></i> Generate Strong Password
+                </button>
 
                 <button class="btn btn-primary w-100" type="submit" name="submit">
                     Register <i class="ri-arrow-right-line"></i>
@@ -110,9 +112,62 @@ if (isset($_POST['submit'])) {
                     Already a member? <a href="index.php">Log In</a>
                 </p>
             </form>
-            </div>
+        </div>
     </div>
 
-</body>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const generateBtn = document.getElementById('generate-password-btn');
+    const passwordField = document.getElementById('password-field');
+    const repassField = document.getElementById('repass-field');
 
+    generateBtn.addEventListener('click', () => {
+        const length = 16;
+        const charset = {
+            lower: "abcdefghijklmnopqrstuvwxyz",
+            upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            numbers: "0123456789",
+            symbols: "!@#$%^&*()_+~`|}{[]:;?><,./-="
+        };
+
+        // 1. Start with one character from each set to guarantee strength
+        let password = [
+            charset.lower[Math.floor(Math.random() * charset.lower.length)],
+            charset.upper[Math.floor(Math.random() * charset.upper.length)],
+            charset.numbers[Math.floor(Math.random() * charset.numbers.length)],
+            charset.symbols[Math.floor(Math.random() * charset.symbols.length)]
+        ];
+
+        // 2. Fill the rest of the password length with random characters from all sets
+        const allChars = charset.lower + charset.upper + charset.numbers + charset.symbols;
+        for (let i = password.length; i < length; i++) {
+            password.push(allChars[Math.floor(Math.random() * allChars.length)]);
+        }
+
+        // 3. Shuffle the array to randomize the order and join to form the final password
+        const finalPassword = password.sort(() => 0.5 - Math.random()).join('');
+
+        // 4. Set the value for both password fields
+        passwordField.value = finalPassword;
+        repassField.value = finalPassword;
+
+        // 5. Copy to clipboard
+        navigator.clipboard.writeText(finalPassword).then(() => {
+            // 6. Provide visual feedback
+            const originalText = generateBtn.innerHTML;
+            generateBtn.innerHTML = '<i class="ri-check-line"></i> Copied to Clipboard!';
+            generateBtn.disabled = true;
+
+            setTimeout(() => {
+                generateBtn.innerHTML = originalText;
+                generateBtn.disabled = false;
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy password: ', err);
+        });
+    });
+});
+</script>
+
+</body>
 </html>
