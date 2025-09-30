@@ -1,5 +1,5 @@
 # ignore private files and backups
-/private/
+private/
 
 # common extras
 .env
