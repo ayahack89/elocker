@@ -161,7 +161,7 @@ body:has(.login-container) {
     margin-bottom: 20px;
 }
 
-/* --- Styles for UserAccount.php (Dashboard) --- */
+/* --- Styles for useraccount.php (Dashboard) --- */
 .dashboard-header h1 {
     font-weight: 600;
     font-size: 2.5rem;
@@ -349,7 +349,7 @@ body:has(.login-container) {
     margin-right: 2px;
 }
 
-/* --- Styles for FAQ.php Accordion --- */
+/* --- Styles for faq.php Accordion --- */
 .accordion-item {
     background-color: transparent;
     border-bottom: 1px solid var(--border-color);

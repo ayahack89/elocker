@@ -1,6 +1,6 @@
 <nav class="custom-navbar">
     <div class="navbar-container">
-        <a class="navbar-brand" href="userAccount.php">
+        <a class="navbar-brand" href="../dashboard/useraccount">
             <i class="ri-door-lock-line"></i>Elocker
         </a>
 
@@ -13,7 +13,7 @@
                 <i class="ri-user-line"></i>
                 <span><?php echo htmlspecialchars($_SESSION['username']); ?></span>
             </div>
-            <a href="logout.php" class="navbar-logout">
+            <a href="../auth/logout" class="navbar-logout">
                 <i class="ri-logout-circle-line"></i>
                 <span>Logout</span>
             </a>

@@ -3,7 +3,7 @@ session_start();
 
 // Security Check: If the user is not logged in, redirect them to the login page.
 if (!isset($_SESSION['username'])) {
-    header('Location: index.php');
+    header('Location: ../index.php');
     exit();
 }
 
@@ -15,16 +15,16 @@ $username = htmlspecialchars($_SESSION['username']);
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <?php include "include/cdn.php"; ?>
+    <?php include "../include/cdn.php"; ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
     <title>Elocker - Dashboard</title>
 </head>
 <body class="background text-light">
 
-    <?php include "include/navbar.php"; ?>
+    <?php include "../include/navbar.php"; ?>
     <main class="container py-5">
         <div class="dashboard-header mb-5">
             <h1>Welcome, <?php echo $username; ?>!</h1>
@@ -34,7 +34,7 @@ $username = htmlspecialchars($_SESSION['username']);
         <div class="row row-cols-1 row-cols-md-2 g-4">
             
             <div class="col">
-                <a href="managepassword.php" class="dashboard-card">
+                <a href="managepassword" class="dashboard-card">
                     <div class="card-icon"><i class="ri-shield-keyhole-line"></i></div>
                     <h5 class="card-title">Manage Passwords</h5>
                     <p class="card-text">View, edit, and organize your saved passwords.</p>
@@ -42,7 +42,7 @@ $username = htmlspecialchars($_SESSION['username']);
             </div>
 
             <div class="col">
-                <a href="storenewpassword.php" class="dashboard-card">
+                <a href="storenewpassword" class="dashboard-card">
                     <div class="card-icon"><i class="ri-database-2-line"></i></div>
                     <h5 class="card-title">Store New Password</h5>
                     <p class="card-text">Safely store a new password in our secure database.</p>
@@ -50,15 +50,15 @@ $username = htmlspecialchars($_SESSION['username']);
             </div>
 
             <div class="col">
-                <a href="faQ.php" class="dashboard-card">
+                <a href="faq" class="dashboard-card">
                     <div class="card-icon"><i class="ri-questionnaire-line"></i></div>
-                    <h5 class="card-title">FAQ</h5>
+                    <h5 class="card-title">faq</h5>
                     <p class="card-text">Have questions? Find answers to clear your doubts.</p>
                 </a>
             </div>
 
             <div class="col">
-                <a href="contact.php" class="dashboard-card">
+                <a href="contact" class="dashboard-card">
                     <div class="card-icon"><i class="ri-customer-service-2-line"></i></div>
                     <h5 class="card-title">Customer Support</h5>
                     <p class="card-text">Encounter an issue? Don't hesitate to email us.</p>

@@ -1,3 +1,5 @@
+Updatedata.php (.ex) 
+
 <?php 
 session_start();
 include "server/db_config.php";

@@ -1,11 +1,11 @@
 <?php 
-include "server/db_config.php";
+include "../private/db_config.php";
 $delete_id = $_GET['delete'];
 $sql = "DELETE FROM `storage` WHERE id = {$delete_id}";
 if(mysqli_query($conn, $sql)){
     ?>
     <script>
-     window.location.href="managepassword.php";
+     window.location.href="managepassword";
     </script>
     <?php 
 }else{

@@ -1,0 +1,301 @@
+<?php
+session_start();
+include "../private/db_config.php";
+include "../private/config.php";
+include "../private/encryption.php"; 
+
+// Security Check: Redirect if not logged in
+if (!isset($_SESSION['username'])) {
+    header('Location: ../index'); // CHANGED: removed .php
+    exit();
+}
+
+$username = $_SESSION['username'];
+$user_id = $_SESSION['id'];
+$get_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$message = '';
+$message_type = '';
+$data = null;
+
+// Debug: Check if ID is received
+if ($get_id === 0) {
+    die("Error: No ID specified in URL");
+}
+
+try {
+    $encryption = new Encryption();
+    
+    // --- Fetch existing data securely using user_id (not username) ---
+    $sql_fetch = "SELECT * FROM `storage` WHERE id = ? AND user_id = ?";
+    $stmt_fetch = mysqli_prepare($conn, $sql_fetch);
+    mysqli_stmt_bind_param($stmt_fetch, "ii", $get_id, $user_id);
+    mysqli_stmt_execute($stmt_fetch);
+    $result = mysqli_stmt_get_result($stmt_fetch);
+
+    if ($result && mysqli_num_rows($result) === 1) {
+        $data = mysqli_fetch_assoc($result);
+        
+        // Debug: Check if data is fetched
+        if (!$data) {
+            die("Error: Failed to fetch data for ID: $get_id");
+        }
+
+        // Decrypt all fields for display in the form
+        $data['email'] = $encryption->decrypt($data['email']);
+        $data['links'] = $encryption->decrypt($data['links']);
+        $data['decrypted_password'] = $encryption->decrypt($data['password']);
+        $data['passkeys'] = $encryption->decrypt($data['passkeys']);
+        $data['notes'] = $encryption->decrypt($data['notes']);
+        
+        // Handle decryption failures
+        $data['email'] = $data['email'] ?: '';
+        $data['links'] = $data['links'] ?: '';
+        $data['decrypted_password'] = $data['decrypted_password'] ?: '';
+        $data['passkeys'] = $data['passkeys'] ?: '';
+        $data['notes'] = $data['notes'] ?: '';
+        
+    } else {
+        // No record found for this user with this ID
+        $message = "Record not found or you don't have permission to edit it.";
+        $message_type = 'alert-danger';
+    }
+} catch (Exception $e) {
+    $message = "System error: " . $e->getMessage();
+    $message_type = 'alert-danger';
+}
+
+// Handle form submission for update
+if (isset($_POST['submit']) && $data) {
+    $get_user_email = trim($_POST['email']);
+    $get_user_links = trim($_POST['link']);
+    $get_user_password = trim($_POST['password']);
+    $get_user_passkeys = trim($_POST['passkeys']);
+    $get_user_notes = trim($_POST['notes']);
+
+    if (!empty($get_user_password)) {
+        try {
+            // Encrypt all fields before updating
+            $encrypted_email = $encryption->encrypt($get_user_email);
+            $encrypted_links = $encryption->encrypt($get_user_links);
+            $encrypted_password = $encryption->encrypt($get_user_password);
+            $encrypted_passkeys = $encryption->encrypt($get_user_passkeys);
+            $encrypted_notes = $encryption->encrypt($get_user_notes);
+            
+            // Update query using prepared statements
+            $sql_update = "UPDATE `storage` SET 
+                          email = ?, 
+                          links = ?, 
+                          password = ?, 
+                          passkeys = ?, 
+                          notes = ?,
+                          lastupdate = CURRENT_TIMESTAMP 
+                          WHERE id = ? AND user_id = ?";
+            
+            $stmt_update = mysqli_prepare($conn, $sql_update);
+            mysqli_stmt_bind_param($stmt_update, "sssssii", 
+                $encrypted_email, 
+                $encrypted_links, 
+                $encrypted_password, 
+                $encrypted_passkeys, 
+                $encrypted_notes, 
+                $get_id, 
+                $user_id
+            );
+
+            if (mysqli_stmt_execute($stmt_update)) {
+                header("Location: managepassword?status=updated"); // CHANGED: removed .php
+                exit();
+            } else {
+                $message = "Database error: " . mysqli_error($conn);
+                $message_type = 'alert-danger';
+            }
+        } catch (Exception $e) {
+            $message = "Encryption error: " . $e->getMessage();
+            $message_type = 'alert-danger';
+        }
+    } else {
+        $message = "Password field cannot be empty.";
+        $message_type = 'alert-danger';
+    }
+}
+
+// If no data found and we're not processing a form, redirect
+if (!$data && !isset($_POST['submit'])) {
+    header('Location: managepassword'); // CHANGED: removed .php
+    exit();
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php include "../include/cdn.php"; ?>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .password-cell-form {
+            position: relative;
+        }
+        .toggle-password-form {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #6c757d;
+            z-index: 5;
+        }
+        .toggle-password-form:hover {
+            color: #495057;
+        }
+        .login-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .login-header h2 {
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+        .login-header p {
+            color: var(--text-muted);
+        }
+        .form-label {
+            color: var(--text-light);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        .form-control {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            padding: 12px 16px;
+        }
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary-color);
+            color: var(--text-light);
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.2);
+        }
+        .form-control:disabled {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-muted);
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .back-link a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+        .back-link a:hover {
+            color: var(--primary-color);
+        }
+    </style>
+    <title>Elocker - Edit Password</title>
+</head>
+<body class="background text-light">
+
+    <?php include "../include/navbar.php"; ?>
+
+    <main class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="login-card">
+                    <div class="login-header">
+                        <h2>Edit Password</h2>
+                        <p>Update the details for this entry below.</p>
+                    </div>
+
+                    <?php if (!empty($message)): ?>
+                        <div class="alert <?php echo $message_type; ?> alert-dismissible fade show" role="alert">
+                            <?php echo $message; ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ($data): ?>
+                    <form class="login-form" method="post" action="">
+                        
+                        <div class="form-group mb-3">
+                            <label for="username" class="form-label"><i class="ri-user-line"></i> Account Owner</label>
+                            <input type="text" class="form-control" id="username" value="<?php echo htmlspecialchars($username); ?>" disabled>
+                            <div class="form-text">This is your account username - it cannot be changed.</div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="email" class="form-label"><i class="ri-user-smile-line"></i> Username/Email/Account ID/Phone *</label>
+                            <input type="text" name="email" id="email" class="form-control" 
+                                   placeholder="e.g., user123, user@example.com, +1234567890, account_id" 
+                                   value="<?php echo htmlspecialchars($data['email']); ?>" required>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="link" class="form-label"><i class="ri-links-line"></i> Website Link (Optional)</label>
+                            <input type="text" name="link" id="link" class="form-control" 
+                                   placeholder="https://example.com" 
+                                   value="<?php echo htmlspecialchars($data['links']); ?>">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="password" class="form-label"><i class="ri-key-line"></i> Password *</label>
+                            <div class="password-cell-form">
+                                <input type="password" name="password" id="password" class="form-control" 
+                                       placeholder="Enter the password to store" 
+                                       value="<?php echo htmlspecialchars($data['decrypted_password']); ?>" required>
+                                <i class="ri-eye-line toggle-password-form" title="Show/Hide Password"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="passkeys" class="form-label"><i class="ri-key-2-line"></i> Passkeys (Optional)</label>
+                            <input type="text" name="passkeys" id="passkeys" class="form-control" 
+                                   placeholder="Passkeys or recovery codes" 
+                                   value="<?php echo htmlspecialchars($data['passkeys']); ?>">
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label for="notes" class="form-label"><i class="ri-sticky-note-line"></i> Notes (Optional)</label>
+                            <textarea name="notes" id="notes" class="form-control" 
+                                      placeholder="Any additional notes" rows="3"><?php echo htmlspecialchars($data['notes']); ?></textarea>
+                        </div>
+
+                        <button class="btn btn-primary w-100 py-2" type="submit" name="submit">
+                            <i class="ri-save-line"></i> Update Password
+                        </button>
+                    </form>
+                    <?php endif; ?>
+
+                    <p class="back-link">
+                        <a href="managepassword"><i class="ri-arrow-left-line"></i> Back to Manage Passwords</a> <!-- CHANGED: removed .php -->
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleIcon = document.querySelector('.toggle-password-form');
+        if (toggleIcon) {
+            toggleIcon.addEventListener('click', function () {
+                const passwordField = document.getElementById('password');
+                const isPassword = passwordField.type === 'password';
+                passwordField.type = isPassword ? 'text' : 'password';
+                this.classList.toggle('ri-eye-line');
+                this.classList.toggle('ri-eye-off-line');
+            });
+        }
+    });
+    </script>
+</body>
+</html>

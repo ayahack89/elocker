@@ -1,4 +1,24 @@
-
 # HTID:22722154: DO NOT REMOVE OR MODIFY THIS LINE AND THE LINES BELOW
 php_value display_errors 1
+
+<Files ".env">
+    Order allow,deny
+    Deny from all
+</Files>
+
 # DO NOT REMOVE OR MODIFY THIS LINE AND THE LINES ABOVE HTID:22722154:
+
+RewriteEngine On
+
+# 1. Handle root request
+RewriteRule ^$ index.php [L]
+
+# 2. Redirect external .php requests to clean URLs
+RewriteCond %{THE_REQUEST} \s/+(.+?)\.php(\?[^\s&]*)?\s [NC]
+RewriteRule ^(.+)\.php$ /$1%2 [R=301,L,NE]
+
+# 3. Internally add .php extension to extensionless requests
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^(.+?)/?$ $1.php [L,QSA]

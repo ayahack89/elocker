@@ -1,9 +1,9 @@
 <?php
 session_start();
 
-// Security Check: If the user is not logged in, redirect them to the login page.
+// Security Check: Redirect if not logged in
 if (!isset($_SESSION['username'])) {
-    header('Location: index.php');
+    header('Location: ../index.php');
     exit();
 }
 ?>
@@ -12,13 +12,13 @@ if (!isset($_SESSION['username'])) {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <?php include "include/cdn.php"; ?>
-    <link rel="stylesheet" href="css/style.css">
+    <?php include "../include/cdn.php"; ?>
+    <link rel="stylesheet" href="../css/style.css">
     <title>Elocker - Contact Support</title>
 </head>
 <body class="background text-light">
 
-    <?php include "include/navbar.php"; ?>
+    <?php include "../include/navbar.php"; ?>
 
     <main class="container py-5">
         <div class="row justify-content-center">
@@ -41,7 +41,7 @@ if (!isset($_SESSION['username'])) {
                     </div>
 
                     <p class="back-link">
-                        <a href="userAccount.php"><i class="ri-arrow-left-line"></i> Back to Dashboard</a>
+                        <a href="useraccount.php"><i class="ri-arrow-left-line"></i> Back to Dashboard</a>
                     </p>
 
                 </div>

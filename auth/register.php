@@ -1,56 +1,94 @@
 <?php
 session_start();
-include "server/db_config.php";
+include "../private/db_config.php";
+include "../private/config.php";
+include "../private/encryption.php"; 
 
 $message = '';
-$message_type = ''; // Will be 'alert-danger' for errors
+$message_type = 'alert-danger'; 
 
 if (isset($_POST['submit'])) {
-    // User Input
-    $username = trim($_POST['username']);
-    $password = trim($_POST['password']);
-    $repass = trim($_POST['repass']);
+    try {
+        // User Input
+        $username = trim($_POST['username']);
+        $password = trim($_POST['password']);
+        $repass = trim($_POST['repass']);
 
-    // --- Form Validation ---
-    if (empty($username) || empty($password) || empty($repass)) {
-        $message = 'Please fill out all fields.';
-        $message_type = 'alert-danger';
-    } elseif (strlen($password) < 8) {
-        $message = 'Password must be at least 8 characters long.';
-        $message_type = 'alert-danger';
-    } elseif ($password !== $repass) {
-        $message = 'Passwords do not match.';
-        $message_type = 'alert-danger';
-    } else {
-        // --- Check if username already exists using a prepared statement ---
-        $sql_check = "SELECT username FROM `register` WHERE username = ?";
-        $stmt_check = mysqli_prepare($conn, $sql_check);
-        mysqli_stmt_bind_param($stmt_check, "s", $username);
-        mysqli_stmt_execute($stmt_check);
-        $result_check = mysqli_stmt_get_result($stmt_check);
-
-        if (mysqli_num_rows($result_check) > 0) {
-            $message = 'This username is already taken. Please choose another.';
-            $message_type = 'alert-danger';
+        // Form Validation
+        if (empty($username) || empty($password) || empty($repass)) {
+            $message = 'Please fill out all fields.';
+        } elseif (strlen($password) < 8) {
+            $message = 'Password must be at least 8 characters long.';
+        } elseif ($password !== $repass) {
+            $message = 'Passwords do not match.';
         } else {
-            // --- Username is available, proceed with insertion ---
-            // Hash the password
-            $password_hash = password_hash($password, PASSWORD_BCRYPT);
-
-            // Insert new user using a prepared statement
-            $sql_insert = "INSERT INTO `register` (username, password) VALUES (?, ?)";
-            $stmt_insert = mysqli_prepare($conn, $sql_insert);
-            mysqli_stmt_bind_param($stmt_insert, "ss", $username, $password_hash);
+            // Initialize encryption
+            $encryption = new Encryption();
             
-            if (mysqli_stmt_execute($stmt_insert)) {
-                $_SESSION['username'] = $username;
-                header("Location: succes.php"); // Redirect to a success page
-                exit();
+            // Check if username already exists
+            $sql_check = "SELECT id, username FROM `register`";
+            $stmt_check = mysqli_prepare($conn, $sql_check);
+            
+            if ($stmt_check === false) {
+                throw new Exception('Database prepare failed: ' . mysqli_error($conn));
+            }
+            
+            mysqli_stmt_execute($stmt_check);
+            $result_check = mysqli_stmt_get_result($stmt_check);
+            
+            $username_exists = false;
+            
+            if ($result_check && mysqli_num_rows($result_check) > 0) {
+                while ($row = mysqli_fetch_assoc($result_check)) {
+                    try {
+                        $decrypted_existing_username = $encryption->decrypt($row['username']);
+                        if ($decrypted_existing_username === $username) {
+                            $username_exists = true;
+                            break;
+                        }
+                    } catch (Exception $e) {
+                        // Skip rows that can't be decrypted
+                        continue;
+                    }
+                }
+            }
+            
+            // Free result
+            mysqli_free_result($result_check);
+
+            if ($username_exists) {
+                $message = 'This username is already taken. Please choose another.';
             } else {
-                $message = 'Something went wrong during registration. Please try again.';
-                $message_type = 'alert-danger';
+                // Username is available, proceed with registration
+                $encrypted_username = $encryption->encrypt($username);
+                $password_hash = password_hash($password, PASSWORD_BCRYPT);
+
+                // Insert new user
+                $sql_insert = "INSERT INTO `register` (username, password) VALUES (?, ?)";
+                $stmt_insert = mysqli_prepare($conn, $sql_insert);
+                
+                if ($stmt_insert === false) {
+                    throw new Exception('Prepare failed: ' . mysqli_error($conn));
+                }
+                
+                mysqli_stmt_bind_param($stmt_insert, "ss", $encrypted_username, $password_hash);
+                
+                if (mysqli_stmt_execute($stmt_insert)) {
+                    $id = mysqli_insert_id($conn);
+                    
+                    $_SESSION['username'] = $username;
+                    $_SESSION['id'] = $id; 
+                    
+                    header("Location: succes.php");
+                    exit();
+                } else {
+                    $message = 'Database error: Could not create account. Please try again.';
+                }
             }
         }
+    } catch (Exception $e) {
+        $message = 'Registration error: ' . $e->getMessage();
+        error_log("Registration error: " . $e->getMessage());
     }
 }
 ?>
@@ -60,11 +98,11 @@ if (isset($_POST['submit'])) {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <?php include "include/cdn.php"; ?>
+    <?php include "../include/cdn.php"; ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
     <title>Elocker - Registration</title>
 </head>
 
@@ -77,17 +115,17 @@ if (isset($_POST['submit'])) {
                 <p>Get started with Elocker today!</p>
             </div>
 
-            <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post" class="login-form">
+            <form action="" method="post" class="login-form">
 
                 <?php
                 if (!empty($message)) {
-                    echo '<div class="alert ' . $message_type . '" role="alert">' . $message . '</div>';
+                    echo '<div class="alert ' . $message_type . '" role="alert">' . htmlspecialchars($message) . '</div>';
                 }
                 ?>
 
                 <div class="input-group mb-3">
                     <span class="input-group-text"><i class="ri-user-line"></i></span>
-                    <input type="text" name="username" class="form-control" placeholder="Choose a Username" aria-label="Username" required>
+                    <input type="text" name="username" class="form-control" placeholder="Choose a Username" aria-label="Username" required value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
                 </div>
 
                 <div class="input-group mb-3">
@@ -109,7 +147,7 @@ if (isset($_POST['submit'])) {
                 </button>
 
                 <p class="register-link">
-                    Already a member? <a href="index.php">Log In</a>
+                    Already a member? <a href="../index.php">Log In</a>
                 </p>
             </form>
         </div>
@@ -130,7 +168,6 @@ document.addEventListener('DOMContentLoaded', function () {
             symbols: "!@#$%^&*()_+~`|}{[]:;?><,./-="
         };
 
-        // 1. Start with one character from each set to guarantee strength
         let password = [
             charset.lower[Math.floor(Math.random() * charset.lower.length)],
             charset.upper[Math.floor(Math.random() * charset.upper.length)],
@@ -138,22 +175,18 @@ document.addEventListener('DOMContentLoaded', function () {
             charset.symbols[Math.floor(Math.random() * charset.symbols.length)]
         ];
 
-        // 2. Fill the rest of the password length with random characters from all sets
         const allChars = charset.lower + charset.upper + charset.numbers + charset.symbols;
         for (let i = password.length; i < length; i++) {
             password.push(allChars[Math.floor(Math.random() * allChars.length)]);
         }
 
-        // 3. Shuffle the array to randomize the order and join to form the final password
         const finalPassword = password.sort(() => 0.5 - Math.random()).join('');
 
-        // 4. Set the value for both password fields
         passwordField.value = finalPassword;
         repassField.value = finalPassword;
 
-        // 5. Copy to clipboard
+        // Copy to clipboard
         navigator.clipboard.writeText(finalPassword).then(() => {
-            // 6. Provide visual feedback
             const originalText = generateBtn.innerHTML;
             generateBtn.innerHTML = '<i class="ri-check-line"></i> Copied to Clipboard!';
             generateBtn.disabled = true;
