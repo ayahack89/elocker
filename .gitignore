@@ -1,0 +1,9 @@
+# ignore private files and backups
+/private/
+
+# common extras
+.env
+*.env
+.DS_Store
+.vscode/
+.idea/
