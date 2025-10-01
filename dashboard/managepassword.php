@@ -6,28 +6,55 @@ include "../private/encryption.php";
 
 // Security Check: Redirect if not logged in
 if (!isset($_SESSION['username'])) {
-    header('Location: ../index'); // CHANGED: removed .php
+    header('Location: ../index');
     exit();
 }
 
 $username = $_SESSION['username'];
 $user_id = $_SESSION['id'];
 $search_term = isset($_POST['search']) ? trim($_POST['search']) : '';
+$category_filter = isset($_POST['category_filter']) ? trim($_POST['category_filter']) : '';
 $passwords = [];
 $total_pages = 0;
 $current_page = 1;
+
+// Define categories (same as in storenewpassword.php)
+$categories = [
+    'Emails' => 'Email Accounts',
+    'Social Media' => 'Social Media',
+    'Banking' => 'Banking & Finance',
+    'E-commerce' => 'E-commerce & Shopping',
+    'Work' => 'Work & Business',
+    'Entertainment' => 'Entertainment',
+    'Utilities' => 'Utilities & Services',
+    'Education' => 'Education',
+    'Gaming' => 'Gaming',
+    'Development' => 'Development',
+    'Others' => 'Others'
+];
 
 try {
     // Initialize encryption
     $encryption = new Encryption();
 
     // --- Database Logic ---
-    if (!empty($search_term)) {
-        // --- Search Query ---
-        // Note: Since data is encrypted, we need to fetch all and search after decryption
+    if (!empty($search_term) || !empty($category_filter)) {
+        // --- Search/Filter Query ---
         $sql = "SELECT * FROM `storage` WHERE user_id = ?";
+        $params = ["i", $user_id];
+        
+        if (!empty($category_filter)) {
+            $sql .= " AND category = ?";
+            $params[0] .= "s";
+            $params[] = $category_filter;
+        }
+        
         $stmt = mysqli_prepare($conn, $sql);
-        mysqli_stmt_bind_param($stmt, "i", $user_id);
+        if (!empty($category_filter)) {
+            mysqli_stmt_bind_param($stmt, ...$params);
+        } else {
+            mysqli_stmt_bind_param($stmt, "i", $user_id);
+        }
     } else {
         // --- Pagination Logic ---
         $limit = 10;
@@ -55,7 +82,7 @@ try {
     if ($result) {
         while ($row = mysqli_fetch_assoc($result)) {
             try {
-                // --- Decrypt All Fields ---
+                // --- Decrypt All Fields (except category) ---
                 $decrypted_username = $encryption->decrypt($row['username']);
                 $decrypted_email = $encryption->decrypt($row['email']);
                 $decrypted_links = $encryption->decrypt($row['links']);
@@ -64,8 +91,8 @@ try {
                 $decrypted_notes = $encryption->decrypt($row['notes']);
 
                 // Replace encrypted data with decrypted data
-                $row['username'] = $decrypted_username ?: 'Decryption Failed!';
-                $row['email'] = $decrypted_email ?: 'Decryption Failed!';
+                $row['username'] = $decrypted_username ?: 'No username';
+                $row['email'] = $decrypted_email ?: 'Empty field';
                 $row['links'] = $decrypted_links ?: '';
                 $row['decrypted_password'] = $decrypted_password ?: 'Decryption Failed!';
                 $row['passkeys'] = $decrypted_passkeys ?: '';
@@ -153,7 +180,7 @@ function getTimeAgo($timestamp)
             color: var(--text-muted) !important;
         }
 
-        /* --- New Search & Controls UI --- */
+        /* --- Updated Control Bar --- */
         .control-bar {
             display: flex;
             align-items: center;
@@ -222,7 +249,30 @@ function getTimeAgo($timestamp)
             background-color: #3f3f46;
         }
 
-        .add-new-btn {
+        .filter-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .category-filter {
+            background-color: #27272a;
+            border: 1px solid #3f3f46;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            min-width: 180px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .category-filter:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.2);
+        }
+
+        .add-new-btn, .export-btn {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
@@ -237,7 +287,7 @@ function getTimeAgo($timestamp)
             text-decoration: none;
         }
 
-        .add-new-btn:hover {
+        .add-new-btn:hover, .export-btn:hover {
             background-color: #0b5ed7;
             border-color: #0a58ca;
             color: #fff;
@@ -254,8 +304,7 @@ function getTimeAgo($timestamp)
         .fixed-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1400px;
-            /* Increased to accommodate new column */
+            min-width: 1500px; /* Increased for new column */
         }
 
         .fixed-table thead {
@@ -289,47 +338,66 @@ function getTimeAgo($timestamp)
             border-bottom: none;
         }
 
-        .col-account {
-            width: 18%;
-            min-width: 200px;
+        /* Updated column widths */
+        .col-category {
+            width: 12%;
+            min-width: 140px;
         }
 
-        .col-website {
+        .col-account {
             width: 16%;
             min-width: 180px;
         }
 
-        .col-password {
+        .col-website {
             width: 14%;
             min-width: 160px;
+        }
+
+        .col-password {
+            width: 12%;
+            min-width: 150px;
         }
 
         .col-passkeys {
-            width: 12%;
-            min-width: 140px;
+            width: 10%;
+            min-width: 130px;
         }
 
         .col-notes {
-            width: 14%;
-            min-width: 160px;
+            width: 12%;
+            min-width: 150px;
         }
 
         .col-strength {
-            width: 10%;
-            min-width: 120px;
+            width: 8%;
+            min-width: 110px;
         }
 
         .col-actions {
-            width: 8%;
-            min-width: 100px;
+            width: 7%;
+            min-width: 90px;
         }
 
         .col-lastupdate {
-            width: 12%;
-            min-width: 140px;
+            width: 9%;
+            min-width: 130px;
         }
 
-        /* New column */
+        /* Category badge styling */
+        .category-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: rgba(13, 110, 253, 0.15);
+            color: var(--primary-color);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid rgba(13, 110, 253, 0.3);
+            white-space: nowrap;
+            text-align: center;
+            width: 100%;
+        }
 
         .account-email {
             font-weight: 500;
@@ -593,13 +661,13 @@ function getTimeAgo($timestamp)
         }
 
         .modal-content {
-            background: var(--card-bg);
+            background: rgba(20, 20, 20, 1);
             border-radius: 12px;
             padding: 2rem;
             max-width: 450px;
             width: 90%;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 1);
         }
 
         .modal-header {
@@ -705,31 +773,10 @@ function getTimeAgo($timestamp)
             margin-bottom: 1.5rem;
         }
 
-        .export-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            white-space: nowrap;
-            border-radius: 9999px;
-            padding: 12px 22px;
-            font-weight: 500;
-            font-size: 0.95rem;
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            color: #fff;
-            text-decoration: none;
-        }
-
-        .export-btn:hover {
-             background-color: #0b5ed7;
-            border-color: #0a58ca;
-            color: #fff;
-        }
-
         /* Responsive */
         @media (max-width: 768px) {
             .fixed-table {
-                min-width: 1200px;
+                min-width: 1300px;
             }
 
             .fixed-table th,
@@ -742,6 +789,21 @@ function getTimeAgo($timestamp)
             }
 
             .modal-btn {
+                min-width: auto;
+                width: 100%;
+            }
+
+            .control-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-controls {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .category-filter {
                 min-width: auto;
                 width: 100%;
             }
@@ -775,54 +837,83 @@ function getTimeAgo($timestamp)
                     </div>
                 <?php endif; ?>
 
-                <div class="control-bar">
-                    <form class="search-form" action="" method="post">
-                        <i class="ri-search-line search-icon"></i>
-                        <input class="search-input" type="search" name="search"
-                            placeholder="Search by email or site..."
-                            value="<?php echo htmlspecialchars($search_term); ?>">
-                        <?php if (!empty($search_term)): ?>
-                            <div class="clear-search-wrapper">
-                                <a href="managepassword" class="clear-search" title="Clear search">
-                                    <i class="ri-close-line"></i>
-                                </a>
-                            </div>
-                        <?php endif; ?>
-                    </form>
-                    <!-- Add this button in the control-bar section, before the "Add New" button -->
-                    <a href="export" class="export-btn">
-                        <i class="ri-download-line"></i> Export Data
-                    </a>
-                    <a href="storenewpassword" class="add-new-btn">
-                        <i class="ri-add-line"></i> Add New
-                    </a>
-                </div>
+                <form method="post" action="">
+                    <div class="control-bar">
+                        <div class="search-form">
+                            <i class="ri-search-line search-icon"></i>
+                            <input class="search-input" type="search" name="search"
+                                placeholder="Search by email or site..."
+                                value="<?php echo htmlspecialchars($search_term); ?>">
+                            <?php if (!empty($search_term)): ?>
+                                <div class="clear-search-wrapper">
+                                    <a href="managepassword" class="clear-search" title="Clear search">
+                                        <i class="ri-close-line"></i>
+                                    </a>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="filter-controls">
+                            <select name="category_filter" class="category-filter">
+                                <option value="">All labels</option>
+                                <?php foreach ($categories as $key => $value): ?>
+                                    <option value="<?php echo htmlspecialchars($key); ?>" 
+                                        <?php echo $category_filter === $key ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($value); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+
+                            <button type="submit" class="add-new-btn">
+                                <i class="ri-filter-line"></i> Apply Filter
+                            </button>
+                        </div>
+
+                        <a href="export" class="add-new-btn">
+                            <i class="ri-download-line"></i> Export Data
+                        </a>
+                        <a href="storenewpassword" class="add-new-btn">
+                            <i class="ri-add-line"></i> Add New
+                        </a>
+                    </div>
+                </form>
 
                 <div class="table-container">
                     <div class="table-responsive">
                         <table class="fixed-table">
                             <thead>
                                 <tr>
+                                    <th class="col-category">Label</th>
                                     <th class="col-account">Account / Email</th>
                                     <th class="col-website">Website</th>
                                     <th class="col-password">Password</th>
-                                    <th class="col-passkeys">Passkeys</th>
-                                    <th class="col-notes">Notes</th>
+                                    <th class="col-passkeys">Passkey</th>
+                                    <th class="col-notes">Note</th>
                                     <th class="col-strength">Strength</th>
                                     <th class="col-actions text-center">Actions</th>
-                                    <th class="col-lastupdate text-center">Last Update</th> <!-- New Column -->
+                                    <th class="col-lastupdate text-center">Last Update</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php if (empty($passwords)): ?>
                                     <tr>
-                                        <td colspan="8" class="empty-state"> <!-- Updated colspan to 8 -->
+                                        <td colspan="9" class="empty-state">
                                             <i class="ri-database-2-line"></i>
                                             <p class="mb-3">
-                                                <?php echo !empty($search_term) ? 'No results found for your search.' : 'You haven\'t stored any passwords yet.'; ?>
+                                                <?php 
+                                                if (!empty($search_term) && !empty($category_filter)) {
+                                                    echo 'No results found for your search and category filter.';
+                                                } elseif (!empty($search_term)) {
+                                                    echo 'No results found for your search.';
+                                                } elseif (!empty($category_filter)) {
+                                                    echo 'No passwords found in this category.';
+                                                } else {
+                                                    echo 'You haven\'t stored any passwords yet.';
+                                                }
+                                                ?>
                                             </p>
-                                            <?php if (empty($search_term)): ?>
-                                                <a href="storenewpassword" class="btn btn-primary"> <!-- CHANGED: removed .php -->
+                                            <?php if (empty($search_term) && empty($category_filter)): ?>
+                                                <a href="storenewpassword" class="btn btn-primary">
                                                     <i class="ri-add-line"></i> Add your first password
                                                 </a>
                                             <?php endif; ?>
@@ -831,6 +922,15 @@ function getTimeAgo($timestamp)
                                 <?php else: ?>
                                     <?php foreach ($passwords as $row): ?>
                                         <tr>
+                                            <td class="col-category">
+                                                <div class="category-badge">
+                                                    <i class="ri-price-tag-3-line"></i>
+                                                    <?php 
+                                                    $category_display = isset($categories[$row['category']]) ? $categories[$row['category']] : $row['category'];
+                                                    echo htmlspecialchars($category_display); 
+                                                    ?>
+                                                </div>
+                                            </td>
                                             <td class="col-account">
                                                 <div class="account-email" title="<?php echo htmlspecialchars($row['email']); ?>">
                                                     <?php echo htmlspecialchars($row['email']); ?>
@@ -924,12 +1024,12 @@ function getTimeAgo($timestamp)
                     </div>
                 </div>
 
-                <?php if (empty($search_term) && $total_pages > 1): ?>
+                <?php if (empty($search_term) && empty($category_filter) && $total_pages > 1): ?>
                     <nav class="pagination-container mt-3">
                         <ul class="pagination justify-content-center">
                             <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                                 <li class="page-item <?php echo ($i == $current_page) ? 'active' : ''; ?>">
-                                    <a class="page-link" href="managepassword?page=<?php echo $i; ?>"><?php echo $i; ?></a> <!-- CHANGED: removed .php -->
+                                    <a class="page-link" href="managepassword?page=<?php echo $i; ?>"><?php echo $i; ?></a>
                                 </li>
                             <?php endfor; ?>
                         </ul>
@@ -983,7 +1083,7 @@ function getTimeAgo($timestamp)
             // Confirm delete action
             confirmDeleteBtn.addEventListener('click', function() {
                 if (currentDeleteId) {
-                    window.location.href = 'delete?delete=' + currentDeleteId; // CHANGED: removed .php
+                    window.location.href = 'delete?delete=' + currentDeleteId;
                 }
             });
 

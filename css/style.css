@@ -89,6 +89,7 @@ body:has(.login-container) {
     border-radius: 8px 0 0 8px;
 }
 
+
 .form-control::placeholder {
     color: var(--text-muted);
     opacity: 1;
@@ -315,6 +316,7 @@ body:has(.login-container) {
     margin-bottom: 8px;
     font-size: 0.9rem;
 }
+
 
 .form-label i {
     margin-right: 5px;
@@ -845,15 +847,19 @@ body:has(.login-container) {
     gap: 1.5rem;
 }
 
-.navbar-user {
+.navbar-user a {
     color: var(--text-muted);
+    text-decoration: none;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
-.navbar-user span {
-    color: var(--text-color);
+
+.navbar-user a:hover {
+    color: whitesmoke; /* Red on hover for logout */
 }
 
 .navbar-logout {

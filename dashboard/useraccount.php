@@ -3,7 +3,7 @@ session_start();
 
 // Security Check: If the user is not logged in, redirect them to the login page.
 if (!isset($_SESSION['username'])) {
-    header('Location: ../index.php');
+    header('Location: ../index');
     exit();
 }
 
@@ -16,9 +16,6 @@ $username = htmlspecialchars($_SESSION['username']);
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php include "../include/cdn.php"; ?>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
     <title>Elocker - Dashboard</title>
 </head>
@@ -32,7 +29,6 @@ $username = htmlspecialchars($_SESSION['username']);
         </div>
 
         <div class="row row-cols-1 row-cols-md-2 g-4">
-            
             <div class="col">
                 <a href="managepassword" class="dashboard-card">
                     <div class="card-icon"><i class="ri-shield-keyhole-line"></i></div>
@@ -61,7 +57,7 @@ $username = htmlspecialchars($_SESSION['username']);
                 <a href="contact" class="dashboard-card">
                     <div class="card-icon"><i class="ri-customer-service-2-line"></i></div>
                     <h5 class="card-title">Customer Support</h5>
-                    <p class="card-text">Encounter an issue? Don't hesitate to email us.</p>
+                    <p class="card-text">Encounter an issue? Don't hesitate to contact us.</p>
                 </a>
             </div>
 

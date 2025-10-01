@@ -41,7 +41,7 @@ if (!isset($_SESSION['username'])) {
                     </div>
 
                     <p class="back-link">
-                        <a href="useraccount.php"><i class="ri-arrow-left-line"></i> Back to Dashboard</a>
+                        <a href="useraccount"><i class="ri-arrow-left-line"></i> Back to Dashboard</a>
                     </p>
 
                 </div>

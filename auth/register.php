@@ -79,7 +79,7 @@ if (isset($_POST['submit'])) {
                     $_SESSION['username'] = $username;
                     $_SESSION['id'] = $id; 
                     
-                    header("Location: succes.php");
+                    header("Location: succes");
                     exit();
                 } else {
                     $message = 'Database error: Could not create account. Please try again.';
@@ -147,7 +147,7 @@ if (isset($_POST['submit'])) {
                 </button>
 
                 <p class="register-link">
-                    Already a member? <a href="../index.php">Log In</a>
+                    Already a member? <a href="../index.php">Sign In</a>
                 </p>
             </form>
         </div>

@@ -5,13 +5,13 @@
         </a>
 
         <button class="navbar-toggle" id="navbar-toggle" aria-controls="navbar-menu" aria-expanded="false">
-            <i class="ri-menu-line"></i>
+            <i class="ri-menu-3-line"></i>
         </button>
 
         <div class="navbar-menu" id="navbar-menu">
             <div class="navbar-user">
-                <i class="ri-user-line"></i>
-                <span><?php echo htmlspecialchars($_SESSION['username']); ?></span>
+               
+                <a href="../dashboard/userprofile"><i class="ri-user-line"></i>  <?php echo htmlspecialchars($_SESSION['username']); ?></a>
             </div>
             <a href="../auth/logout" class="navbar-logout">
                 <i class="ri-logout-circle-line"></i>
@@ -34,11 +34,11 @@ if (navbarToggle && navbarMenu) {
         // Bonus: Change hamburger icon to close icon
         const icon = navbarToggle.querySelector('i');
         if (navbarMenu.classList.contains('is-active')) {
-            icon.classList.remove('ri-menu-line');
+            icon.classList.remove('ri-menu-3-line');
             icon.classList.add('ri-close-line');
         } else {
             icon.classList.remove('ri-close-line');
-            icon.classList.add('ri-menu-line');
+            icon.classList.add('ri-menu-3-line');
         }
     });
 }

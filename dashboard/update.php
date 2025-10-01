@@ -17,6 +17,21 @@ $message = '';
 $message_type = '';
 $data = null;
 
+// Define categories (same as in storenewpassword.php)
+$categories = [
+    'Emails' => 'Email Accounts',
+    'Social Media' => 'Social Media',
+    'Banking' => 'Banking & Finance',
+    'E-commerce' => 'E-commerce & Shopping',
+    'Work' => 'Work & Business',
+    'Entertainment' => 'Entertainment',
+    'Utilities' => 'Utilities & Services',
+    'Education' => 'Education',
+    'Gaming' => 'Gaming',
+    'Development' => 'Development',
+    'Others' => 'Others'
+];
+
 // Debug: Check if ID is received
 if ($get_id === 0) {
     die("Error: No ID specified in URL");
@@ -66,13 +81,18 @@ try {
 
 // Handle form submission for update
 if (isset($_POST['submit']) && $data) {
+    $get_user_category = trim($_POST['category']);
     $get_user_email = trim($_POST['email']);
     $get_user_links = trim($_POST['link']);
     $get_user_password = trim($_POST['password']);
     $get_user_passkeys = trim($_POST['passkeys']);
     $get_user_notes = trim($_POST['notes']);
 
-    if (!empty($get_user_password)) {
+    // Validate category
+    if (empty($get_user_category) || !array_key_exists($get_user_category, $categories)) {
+        $message = 'Please select a valid category.';
+        $message_type = 'alert-danger';
+    } elseif (!empty($get_user_password)) {
         try {
             // Encrypt all fields before updating
             $encrypted_email = $encryption->encrypt($get_user_email);
@@ -81,8 +101,9 @@ if (isset($_POST['submit']) && $data) {
             $encrypted_passkeys = $encryption->encrypt($get_user_passkeys);
             $encrypted_notes = $encryption->encrypt($get_user_notes);
             
-            // Update query using prepared statements
+            // Update query using prepared statements (including category)
             $sql_update = "UPDATE `storage` SET 
+                          category = ?,
                           email = ?, 
                           links = ?, 
                           password = ?, 
@@ -92,7 +113,8 @@ if (isset($_POST['submit']) && $data) {
                           WHERE id = ? AND user_id = ?";
             
             $stmt_update = mysqli_prepare($conn, $sql_update);
-            mysqli_stmt_bind_param($stmt_update, "sssssii", 
+            mysqli_stmt_bind_param($stmt_update, "ssssssii", 
+                $get_user_category,
                 $encrypted_email, 
                 $encrypted_links, 
                 $encrypted_password, 
@@ -200,6 +222,17 @@ if (!$data && !isset($_POST['submit'])) {
         .back-link a:hover {
             color: var(--primary-color);
         }
+        .category-badge-edit {
+            display: inline-block;
+            padding: 6px 12px;
+            background: rgba(13, 110, 253, 0.15);
+            color: var(--primary-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: 1px solid rgba(13, 110, 253, 0.3);
+            margin-left: 10px;
+        }
     </style>
     <title>Elocker - Edit Password</title>
 </head>
@@ -233,10 +266,31 @@ if (!$data && !isset($_POST['submit'])) {
                         </div>
 
                         <div class="form-group mb-3">
+                            <label for="category" class="form-label">
+                                <i class="ri-price-tag-3-line"></i> Label *
+                                <?php if (isset($data['category'])): ?>
+                                    <span class="category-badge-edit">
+                                        
+                                        <i class="ri-price-tag-3-line"></i> <?php echo isset($categories[$data['category']]) ? htmlspecialchars($categories[$data['category']]) : htmlspecialchars($data['category']); ?>
+                                    </span>
+                                <?php endif; ?>
+                            </label>
+                            <select name="category" id="category" class="form-control">
+                                <option value="">Select a category</option>
+                                <?php foreach ($categories as $key => $value): ?>
+                                    <option value="<?php echo htmlspecialchars($key); ?>" 
+                                        <?php echo (isset($data['category']) && $data['category'] === $key) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($value); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
                             <label for="email" class="form-label"><i class="ri-user-smile-line"></i> Username/Email/Account ID/Phone *</label>
                             <input type="text" name="email" id="email" class="form-control" 
                                    placeholder="e.g., user123, user@example.com, +1234567890, account_id" 
-                                   value="<?php echo htmlspecialchars($data['email']); ?>" required>
+                                   value="<?php echo htmlspecialchars($data['email']); ?>">
                         </div>
 
                         <div class="form-group mb-3">
@@ -251,7 +305,7 @@ if (!$data && !isset($_POST['submit'])) {
                             <div class="password-cell-form">
                                 <input type="password" name="password" id="password" class="form-control" 
                                        placeholder="Enter the password to store" 
-                                       value="<?php echo htmlspecialchars($data['decrypted_password']); ?>" required>
+                                       value="<?php echo htmlspecialchars($data['decrypted_password']); ?>">
                                 <i class="ri-eye-line toggle-password-form" title="Show/Hide Password"></i>
                             </div>
                         </div>
@@ -270,7 +324,7 @@ if (!$data && !isset($_POST['submit'])) {
                         </div>
 
                         <button class="btn btn-primary w-100 py-2" type="submit" name="submit">
-                            <i class="ri-save-line"></i> Update Password
+                            <i class="ri-loop-left-line"></i> Update 
                         </button>
                     </form>
                     <?php endif; ?>

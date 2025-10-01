@@ -12,7 +12,7 @@ $error_message = '';
 
 // Redirect if already logged in
 if (isset($_SESSION['username'])) {
-    header('Location: dashboard/useraccount.php');
+    header('Location: dashboard/useraccount');
     exit();
 }
 
@@ -93,9 +93,6 @@ if (isset($_POST['submit'])) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php include "include/cdn.php"; ?>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <title>Elocker - Login</title>
 </head>
@@ -105,7 +102,7 @@ if (isset($_POST['submit'])) {
     <div class="login-container">
         <div class="login-card">
             <div class="login-header">
-                <h2>Welcome Back!</h2>
+                <h2>Welcome!</h2>
                 <p>Sign in to continue to Elocker</p>
             </div>
 
@@ -119,16 +116,16 @@ if (isset($_POST['submit'])) {
 
                 <div class="input-group mb-3">
                     <span class="input-group-text"><i class="ri-user-line"></i></span>
-                    <input type="text" name="username" class="form-control" placeholder="Username" aria-label="Username" required value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
+                    <input type="text" name="username" class="form-control" placeholder="Username" aria-label="Username" value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
                 </div>
 
                 <div class="input-group mb-4">
                     <span class="input-group-text"><i class="ri-key-2-line"></i></span>
-                    <input type="password" name="password" class="form-control" placeholder="Password" aria-label="Password" required>
+                    <input type="password" name="password" class="form-control" placeholder="Password" aria-label="Password">
                 </div>
 
                 <button class="btn btn-primary w-100" type="submit" name="submit">
-                    Log In <i class="ri-arrow-right-line"></i>
+                    Sign In <i class="ri-arrow-right-line"></i>
                 </button>
 
                 <p class="register-link">

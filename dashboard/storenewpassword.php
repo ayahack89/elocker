@@ -15,6 +15,21 @@ $user_id = isset($_SESSION['id']) ? $_SESSION['id'] : null;
 $message = '';
 $message_type = '';
 
+// Define categories
+$categories = [
+    'Emails' => 'Email Accounts',
+    'Social Media' => 'Social Media',
+    'Banking' => 'Banking & Finance',
+    'E-commerce' => 'E-commerce & Shopping',
+    'Work' => 'Work & Business',
+    'Entertainment' => 'Entertainment',
+    'Utilities' => 'Utilities & Services',
+    'Education' => 'Education',
+    'Gaming' => 'Gaming',
+    'Development' => 'Development',
+    'Others' => 'Others'
+];
+
 // Additional security check - if user_id is not set, something is wrong
 if (!$user_id) {
     $message = 'User session error. Please log in again.';
@@ -27,13 +42,18 @@ if (isset($_POST['submit']) && $user_id) {
         $encryption = new Encryption();
         
         // User Input - trim all inputs
+        $category = trim($_POST['category']);
         $email = trim($_POST['email']);
         $link = trim($_POST['link']);
         $password = trim($_POST['password']);
         $passkeys = trim($_POST['passkeys']);
         $notes = trim($_POST['notes']);
         
-        if (!empty($password)) {
+        // Validate category
+        if (empty($category) || !array_key_exists($category, $categories)) {
+            $message = 'Please select a valid category.';
+            $message_type = 'alert-danger';
+        } elseif (!empty($password)) {
             // Encrypt all sensitive fields
             $encrypted_username = $encryption->encrypt($username);
             $encrypted_email = $encryption->encrypt($email);
@@ -43,11 +63,12 @@ if (isset($_POST['submit']) && $user_id) {
             $encrypted_notes = $encryption->encrypt($notes);
             
             // --- Use a prepared statement to prevent SQL injection ---
-            $query = "INSERT INTO `storage` (`user_id`, `username`, `email`, `links`, `password`, `passkeys`, `notes`) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            $query = "INSERT INTO `storage` (`user_id`, `username`, `category`, `email`, `links`, `password`, `passkeys`, `notes`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = mysqli_prepare($conn, $query);
-            mysqli_stmt_bind_param($stmt, "issssss", 
+            mysqli_stmt_bind_param($stmt, "isssssss", 
                 $user_id, 
                 $encrypted_username, 
+                $category,  // Store category as plain text for filtering
                 $encrypted_email, 
                 $encrypted_link, 
                 $encrypted_password, 
@@ -57,7 +78,7 @@ if (isset($_POST['submit']) && $user_id) {
 
             if (mysqli_stmt_execute($stmt)) {
                 mysqli_close($conn);
-                header("Location: managepassword?status=success"); // CHANGED: removed .php
+                header("Location: managepassword?status=success");
                 exit();
             } else {
                 $message = "Database error: Could not store the password.";
@@ -111,8 +132,18 @@ if (isset($_POST['submit']) && $user_id) {
                         </div>
 
                         <div class="form-group mb-3">
+                            <label for="category" class="form-label"><i class="ri-price-tag-3-line"></i> Label *</label>
+                            <select name="category" id="category" class="form-control" >
+                                <option value="">Add a label</option>
+                                <?php foreach ($categories as $key => $value): ?>
+                                    <option value="<?php echo htmlspecialchars($key); ?>"><?php echo htmlspecialchars($value); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
                             <label for="email" class="form-label"><i class="ri-user-smile-line"></i> Username/Email/Account ID/Phone</label>
-                            <input type="text" name="email" id="email" class="form-control" placeholder="e.g., user123, user@example.com, +1234567890, account_id" required>
+                            <input type="text" name="email" id="email" class="form-control" placeholder="e.g., user123, user@example.com, +1234567890, account_id">
                         </div>
 
                         <div class="form-group mb-3">
@@ -122,7 +153,7 @@ if (isset($_POST['submit']) && $user_id) {
 
                         <div class="form-group mb-3">
                             <label for="password" class="form-label"><i class="ri-key-line"></i> Password</label>
-                            <input type="password" name="password" id="password" class="form-control" placeholder="Enter the password to store" required>
+                            <input type="password" name="password" id="password" class="form-control" placeholder="Enter the password to store">
                         </div>
 
                         <div class="form-group mb-3">
@@ -141,7 +172,7 @@ if (isset($_POST['submit']) && $user_id) {
                     </form>
 
                      <p class="back-link">
-                        <a href="useraccount"><i class="ri-arrow-left-line"></i> Back to Dashboard</a> <!-- CHANGED: removed .php -->
+                        <a href="useraccount"><i class="ri-arrow-left-line"></i> Back to Dashboard</a>
                     </p>
                 </div>
             </div>
