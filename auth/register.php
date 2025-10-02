@@ -103,7 +103,7 @@ if (isset($_POST['submit'])) {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
-    <title>Elocker - Registration</title>
+    <title>Wolfallet - Registration</title>
 </head>
 
 <body>
@@ -112,7 +112,7 @@ if (isset($_POST['submit'])) {
         <div class="login-card">
             <div class="login-header">
                 <h2>Create an Account</h2>
-                <p>Get started with Elocker today!</p>
+                <p>Get started with Wolfallet today!</p>
             </div>
 
             <form action="" method="post" class="login-form">
@@ -147,7 +147,7 @@ if (isset($_POST['submit'])) {
                 </button>
 
                 <p class="register-link">
-                    Already a member? <a href="../index.php">Sign In</a>
+                    Already a member? <a href="../index">Sign In</a>
                 </p>
             </form>
         </div>

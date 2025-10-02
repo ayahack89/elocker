@@ -17,7 +17,7 @@ $username = htmlspecialchars($_SESSION['username']);
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php include "../include/cdn.php"; ?>
     <link rel="stylesheet" href="../css/style.css">
-    <title>Elocker - Dashboard</title>
+    <title>Wolfallet - Dashboard</title>
 </head>
 <body class="background text-light">
 

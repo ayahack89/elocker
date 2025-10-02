@@ -19,7 +19,7 @@ $username = htmlspecialchars($_SESSION['username']);
     <?php include "../include/cdn.php"; ?>
     <!-- Your CSS -->
     <link rel="stylesheet" href="../css/style.css">
-    <title>Elocker - Registration Successful</title>
+    <title>Wolfallet - Registration Successful</title>
     <style>
         .alert-warning {
             background: rgba(255, 193, 7, 0.1);
@@ -65,7 +65,7 @@ $username = htmlspecialchars($_SESSION['username']);
             <!-- Header -->
             <div class="login-header mb-4">
                 <h2>Registration Successful!</h2>
-                <p class="mt-3">Welcome to Elocker, <strong><?php echo $username; ?></strong>!</p>
+                <p class="mt-3">Welcome to Wolfallet, <strong><?php echo $username; ?></strong>!</p>
             </div>
 
             <!-- Informational Text -->

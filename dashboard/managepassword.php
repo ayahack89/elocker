@@ -816,7 +816,7 @@ function getTimeAgo($timestamp)
             }
         }
     </style>
-    <title>Elocker - Manage Passwords</title>
+    <title>Wolfallet - Manage Passwords</title>
 </head>
 
 <body class="background text-light">

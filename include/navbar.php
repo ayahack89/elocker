@@ -1,7 +1,7 @@
 <nav class="custom-navbar">
     <div class="navbar-container">
         <a class="navbar-brand" href="../dashboard/useraccount">
-            <i class="ri-door-lock-line"></i>Elocker
+            <i class="ri-settings-2-fill"></i>Wolfallet
         </a>
 
         <button class="navbar-toggle" id="navbar-toggle" aria-controls="navbar-menu" aria-expanded="false">

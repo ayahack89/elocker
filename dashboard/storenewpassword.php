@@ -102,7 +102,7 @@ if (isset($_POST['submit']) && $user_id) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php include "../include/cdn.php"; ?>
     <link rel="stylesheet" href="../css/style.css">
-    <title>Elocker - Store New Password</title>
+    <title>Wolfallet - Store New Password</title>
 </head>
 <body class="background text-light">
 

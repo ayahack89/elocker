@@ -94,7 +94,7 @@ if (isset($_POST['submit'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php include "include/cdn.php"; ?>
     <link rel="stylesheet" href="css/style.css">
-    <title>Elocker - Login</title>
+    <title>Wolfallet - SignIn</title>
 </head>
 
 <body>
@@ -103,7 +103,7 @@ if (isset($_POST['submit'])) {
         <div class="login-card">
             <div class="login-header">
                 <h2>Welcome!</h2>
-                <p>Sign in to continue to Elocker</p>
+                <p>Sign in to continue to Wolfallet</p>
             </div>
 
             <form action="" method="post" class="login-form">
