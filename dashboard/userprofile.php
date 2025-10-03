@@ -13,6 +13,43 @@ if (!isset($_SESSION['username'])) {
 // Create encryption instance
 $encryption = new Encryption();
 
+// Handle account deletion
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_account'])) {
+    $username = $_SESSION['username'];
+    
+    try {
+        // Begin transaction
+        $conn->begin_transaction();
+        
+        // Delete user data from all tables
+        $tables = ['feedback', 'newsletter_subscriptions']; // Add other tables as needed
+        
+        foreach ($tables as $table) {
+            $delete_sql = "DELETE FROM $table WHERE username = ?";
+            $stmt = $conn->prepare($delete_sql);
+            // Encrypt username for matching encrypted records
+            $encrypted_username = $encryption->encrypt($username);
+            $stmt->bind_param("s", $encrypted_username);
+            $stmt->execute();
+            $stmt->close();
+        }
+        
+        // Commit transaction
+        $conn->commit();
+        
+        // Destroy session and redirect
+        session_destroy();
+        header('Location: ../index?account_deleted=true');
+        exit();
+        
+    } catch (Exception $e) {
+        // Rollback transaction on error
+        $conn->rollback();
+        $delete_error = "Error deleting account. Please try again or contact support.";
+        error_log("Account deletion error: " . $e->getMessage());
+    }
+}
+
 // Handle feedback form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_feedback'])) {
     $username = $_SESSION['username'];
@@ -87,12 +124,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subscribe_newsletter'
     }
 }
 
-// Fetch current user's feedback - FIXED VERSION
+// Fetch current user's feedback - UPDATED VERSION WITH REAL NAME
 $user_feedback = [];
 
 try {
     // Get ALL feedback records first to debug
-    $debug_sql = "SELECT username, feedback_oppinion, feedback_time FROM feedback ORDER BY feedback_time DESC LIMIT 10";
+    $debug_sql = "SELECT username, real_name, feedback_oppinion, feedback_time FROM feedback ORDER BY feedback_time DESC LIMIT 10";
     $debug_stmt = $conn->prepare($debug_sql);
     $debug_stmt->execute();
     $debug_result = $debug_stmt->get_result();
@@ -119,16 +156,19 @@ try {
     if (!empty($matching_records)) {
         foreach ($matching_records as $record) {
             try {
-                // Decrypt the feedback content
+                // Decrypt the feedback content and real name
                 $decrypted_feedback = $encryption->decrypt($record['feedback_oppinion']);
+                $decrypted_real_name = !empty($record['real_name']) ? $encryption->decrypt($record['real_name']) : '';
                 
                 $user_feedback[] = [
+                    'real_name' => $decrypted_real_name,
                     'feedback_oppinion' => $decrypted_feedback,
                     'feedback_time' => $record['feedback_time']
                 ];
             } catch (Exception $e) {
                 error_log("Decryption error for feedback: " . $e->getMessage());
                 $user_feedback[] = [
+                    'real_name' => '',
                     'feedback_oppinion' => '[Unable to decrypt this feedback]',
                     'feedback_time' => $record['feedback_time']
                 ];
@@ -162,365 +202,35 @@ if ($table_result->num_rows == 0) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php include "../include/cdn.php"; ?>
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/layout.css">
     <title>Wolfallet - User Profile</title>
-    <style>
-        :root {
-            --primary-color: #0d6efd;
-            --card-color: #1a1a1a;
-            --text-color: #f8f9fa;
-            --text-muted: #6c757d;
-            --border-color: #2d2d2d;
-            --background: #0f0f0f;
-        }
-        
-        body {
-            background-color: var(--background);
-            color: var(--text-color);
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 1200px;
-        }
-        
-        .dashboard-header {
-            margin-bottom: 3rem;
-        }
-        
-        .dashboard-header h1 {
-            font-weight: 600;
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .dashboard-header-sub {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-        }
-        
-        .profile-section {
-            margin-bottom: 2rem;
-        }
-        
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            color: var(--text-color);
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .dashboard-card {
-            background-color: var(--card-color);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 2rem;
-            height: 100%;
-            margin-bottom: 2rem;
-        }
-        
-        .dashboard-card:hover {
-            background-color: #222121;
-        }
-        
-        .card-icon {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-        
-        .card-title {
-            font-weight: 500;
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
-            color: var(--text-color);
-        }
-        
-        .card-text {
-            color: var(--text-muted);
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-        }
-        
-        .form-label {
-            color: var(--text-color);
-            font-weight: 500;
-            margin-bottom: 0.75rem;
-        }
-        
-        .form-control {
-            background-color: #2a2a2a;
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-        
-        .form-control:focus {
-            background-color: #2a2a2a;
-            border-color: var(--primary-color);
-            color: var(--text-color);
-            box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
-        }
-        
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            padding: 10px 24px;
-            border-radius: 8px;
-            font-weight: 500;
-        }
-        
-        .btn-primary:hover {
-            background-color: #0b5ed7;
-            border-color: #0a58ca;
-        }
-        
-        .alert {
-            border-radius: 8px;
-            padding: 1rem 1.25rem;
-            margin-bottom: 1.5rem;
-            border: none;
-        }
-        
-        .alert-success {
-            background-color: rgba(25, 135, 84, 0.1);
-            color: #75b798;
-            border-left: 4px solid #198754;
-        }
-        
-        .alert-danger {
-            background-color: rgba(220, 53, 69, 0.1);
-            color: #ea868f;
-            border-left: 4px solid #dc3545;
-        }
-        
-        /* Facebook-style Comment Design */
-        .feedback-item {
-            background-color: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            transition: all 0.2s ease;
-        }
-        
-        .feedback-item:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-        
-        .feedback-header {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-        
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary-color) 0%, #6f42c1 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            flex-shrink: 0;
-            font-size: 1.2rem;
-        }
-        
-        .user-info {
-            flex: 1;
-        }
-        
-        .user-name {
-            margin: 0;
-            color: var(--text-color);
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-        
-        .feedback-meta {
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            margin: 2px 0 0 0;
-        }
-        
-        .feedback-content {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-left: 52px; /* Align with user info */
-            color: var(--text-color);
-            line-height: 1.5;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-        }
-        
-        .feedback-content:before {
-            content: '';
-            position: absolute;
-            left: -8px;
-            top: 12px;
-            width: 0;
-            height: 0;
-            border-top: 8px solid transparent;
-            border-bottom: 8px solid transparent;
-            border-right: 8px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 3rem 2rem;
-            color: var(--text-muted);
-        }
-        
-        .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 1.5rem;
-            opacity: 0.5;
-        }
-        
-        .policy-cards {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-top: 1rem;
-        }
-        
-        .policy-card {
-            background-color: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .policy-card:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-            border-color: var(--primary-color);
-        }
-        
-        .policy-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            color: var(--primary-color);
-        }
-        
-        .policy-card h4 {
-            color: var(--text-color);
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-        
-        .policy-card p {
-            color: var(--text-muted);
-            margin: 0;
-        }
-        
-        /* Modal Styling */
-        .modal-content {
-            background-color: var(--card-color);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-        }
-        
-        .modal-header {
-            border-bottom: 1px solid var(--border-color);
-            padding: 1.5rem 2rem;
-        }
-        
-        .modal-title {
-            color: var(--text-color);
-            font-weight: 600;
-        }
-        
-        .modal-body {
-            padding: 2rem;
-            color: var(--text-color);
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-        
-        .modal-body h5 {
-            color: var(--text-color);
-            margin-top: 1.5rem;
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-        }
-        
-        .modal-body p {
-            margin-bottom: 1rem;
-            line-height: 1.6;
-            color: var(--text-color);
-        }
-        
-        .btn-close {
-            filter: invert(1);
-        }
-        
-        .back-link {
-            margin-top: 3rem;
-            text-align: center;
-        }
-        
-        .back-link a {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 500;
-            padding: 0.75rem 1.5rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            transition: all 0.2s ease;
-        }
-        
-        .back-link a:hover {
-            background-color: rgba(13, 110, 253, 0.1);
-            text-decoration: none;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 0 15px;
-            }
-            
-            .dashboard-card {
-                padding: 1.5rem;
-            }
-            
-            .policy-cards {
-                grid-template-columns: 1fr;
-            }
-            
-            .dashboard-header h1 {
-                font-size: 2rem;
-            }
-            
-            .feedback-content {
-                margin-left: 0;
-                margin-top: 12px;
-            }
-            
-            .feedback-content:before {
-                display: none;
-            }
-        }
-    </style>
 </head>
 <body class="background text-light">
     <?php include "../include/navbar.php"; ?>
     
     <main class="container py-5">
+        <!-- Back Link at Top -->
+        <div class="back-link-top">
+            <a href="useraccount"><i class="ri-arrow-left-line"></i> Back to Dashboard</a>
+        </div>
+
         <div class="dashboard-header">
-            <h1>User Profile</h1>
-            <p class="dashboard-header-sub">Manage your feedback, subscriptions, and account preferences</p>
+            <div class="header-actions">
+                <div class="header-text">
+                    <h1>User Profile</h1>
+                    <p class="dashboard-header-sub">Manage your feedback, subscriptions, and account preferences</p>
+                </div>
+  
+
+<!-- *** This feature on hold ***  -->
+
+<!-- <button type="button" class="btn export-keys-btn" data-bs-toggle="modal" data-bs-target="#exportModal">
+    <i class="ri-download-line"></i> Export Stored Passwords
+</button> --> 
+
+<!-- *** This feature on hold ***  -->
+
+            </div>
         </div>
 
         <div class="row">
@@ -612,7 +322,16 @@ if ($table_result->num_rows == 0) {
                                             <i class="ri-user-line"></i>
                                         </div>
                                         <div class="user-info">
-                                            <h6 class="user-name">Anonymous</h6>
+                                            <h6 class="user-name">
+                                                <?php 
+                                                // Display real name if available, otherwise show Anonymous
+                                                if (!empty($feedback['real_name'])) {
+                                                    echo htmlspecialchars($feedback['real_name']);
+                                                } else {
+                                                    echo 'Anonymous';
+                                                }
+                                                ?>
+                                            </h6>
                                             <p class="feedback-meta">Submitted on <?php echo date('M j, Y g:i A', strtotime($feedback['feedback_time'])); ?></p>
                                         </div>
                                     </div>
@@ -653,18 +372,63 @@ if ($table_result->num_rows == 0) {
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Back to Dashboard -->
-        <div class="back-link">
-            <a href="useraccount"><i class="ri-arrow-left-line"></i> Back to Dashboard</a>
+            <!-- Danger Zone Section -->
+            <div class="col-12 profile-section">
+                <div class="danger-zone">
+                    <div class="danger-zone-header">
+                        <i class="ri-error-warning-line"></i>
+                        Danger Zone
+                    </div>
+                    <div class="danger-zone-content">
+                        <p>These actions are irreversible and will permanently affect your account. Please proceed with caution.</p>
+                    </div>
+                    <button type="button" class="btn delete-account-btn" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                        <i class="ri-delete-bin-line"></i> Delete Account Permanently
+                    </button>
+                </div>
+            </div>
         </div>
     </main>
+
+    <!-- Delete Account Modal -->
+    <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteAccountModalLabel">Delete Account</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <?php if (isset($delete_error)): ?>
+                        <div class="alert alert-danger"><?php echo $delete_error; ?></div>
+                    <?php endif; ?>
+                    
+                    <div class="warning-text">
+                        <i class="ri-error-warning-line"></i> Warning: This action is irreversible!
+                    </div>
+                    
+                    <p>You cannot undo or backup your data anymore. This action is permanent.</p>
+                    
+                    <p>If you have any query or facing any issue, please <a href="contact" class="support-link">contact support</a> before proceeding.</p>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form method="POST" action="" style="display: inline;">
+                            <button type="submit" name="delete_account" class="btn btn-danger" onclick="return confirm('Are you absolutely sure? This will permanently delete your account and all your data.')">
+                                Delete My Account Permanently
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Terms & Conditions Modal -->
     <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
-            <div class="modal-content">
+            <div class="modal-content-f">
                 <div class="modal-header">
                     <h5 class="modal-title" id="termsModalLabel">Terms & Conditions</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -701,10 +465,11 @@ if ($table_result->num_rows == 0) {
         </div>
     </div>
 
+ 
     <!-- Privacy Policy Modal -->
     <div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
-            <div class="modal-content">
+            <div class="modal-content-f">
                 <div class="modal-header">
                     <h5 class="modal-title" id="privacyModalLabel">Privacy Policy</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -739,7 +504,7 @@ if ($table_result->num_rows == 0) {
     </div>
 
     <script>
-        // Real-time feedback updates
+       // Real-time feedback updates
         document.addEventListener('DOMContentLoaded', function() {
             // Auto-hide alerts after 5 seconds
             const alerts = document.querySelectorAll('.alert');
@@ -752,24 +517,63 @@ if ($table_result->num_rows == 0) {
                 }, 5000);
             });
             
-            // Clear form fields on successful submission
-            <?php if (isset($feedback_success)): ?>
-                setTimeout(() => {
-                    const form = document.querySelector('form[method="POST"]');
-                    if (form) {
-                        form.reset();
+            // Delete account confirmation
+            const deleteForm = document.querySelector('form[method="POST"] button[name="delete_account"]');
+            if (deleteForm) {
+                deleteForm.addEventListener('click', function(e) {
+                    if (!confirm('Are you absolutely sure? This will permanently delete your account and all your data.')) {
+                        e.preventDefault();
                     }
-                }, 100);
-            <?php endif; ?>
+                });
+            }
             
-            <?php if (isset($newsletter_success)): ?>
-                setTimeout(() => {
-                    const newsletterInput = document.querySelector('input[name="newsletter_email"]');
-                    if (newsletterInput) {
-                        newsletterInput.value = '';
+            // Export agreement checkbox validation
+            const exportAgreement = document.getElementById('exportAgreement');
+            const exportSubmit = document.getElementById('exportSubmit');
+            
+            if (exportAgreement && exportSubmit) {
+                exportAgreement.addEventListener('change', function() {
+                    exportSubmit.disabled = !this.checked;
+                    // Update button style based on state
+                    if (this.checked) {
+                        exportSubmit.classList.remove('btn-secondary');
+                        exportSubmit.classList.add('btn-primary');
+                    } else {
+                        exportSubmit.classList.remove('btn-primary');
+                        exportSubmit.classList.add('btn-secondary');
                     }
-                }, 100);
-            <?php endif; ?>
+                });
+            }
+            
+            // Reset export form when modal is closed
+            const exportModal = document.getElementById('exportModal');
+            if (exportModal) {
+                exportModal.addEventListener('hidden.bs.modal', function () {
+                    const exportAgreement = document.getElementById('exportAgreement');
+                    const exportSubmit = document.getElementById('exportSubmit');
+                    if (exportAgreement) {
+                        exportAgreement.checked = false;
+                    }
+                    if (exportSubmit) {
+                        exportSubmit.disabled = true;
+                        exportSubmit.classList.remove('btn-primary');
+                        exportSubmit.classList.add('btn-secondary');
+                    }
+                });
+            }
+
+            // Handle export form submission
+            const exportForm = document.getElementById('exportForm');
+            if (exportForm) {
+                exportForm.addEventListener('submit', function(e) {
+                    const exportAgreement = document.getElementById('exportAgreement');
+                    if (!exportAgreement || !exportAgreement.checked) {
+                        e.preventDefault();
+                        alert('Please agree to the export terms before proceeding.');
+                        return false;
+                    }
+                });
+            }
         });
     </script>
 </body>

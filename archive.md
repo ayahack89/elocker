@@ -1710,3 +1710,176 @@ function getTimeAgo($timestamp) {
     </script>
 </body>
 </html>
+
+
+
+Userprofile.php ft. Export auth keys (On hold)
+
+html (model)
+
+  <!-- Export Stored Passwords Modal -->
+    <div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exportModalLabel">
+                        <i class="ri-download-line"></i> Export Stored Passwords
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <?php if (isset($export_error)): ?>
+                        <div class="alert alert-danger">
+                            <i class="ri-error-warning-line"></i> <?php echo $export_error; ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <!-- Danger Warning -->
+                    <div class="alert alert-danger mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="ri-alert-fill me-2" style="font-size: 1.2rem;"></i>
+                            <strong>Security Notice</strong>
+                        </div>
+                        <p class="mb-0 mt-2">This action will decrypt and export your sensitive password data. Ensure you are in a secure environment before proceeding.</p>
+                    </div>
+
+                    <!-- Daily Limit Warning -->
+                    <div class="alert alert-warning mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="ri-time-line me-2" style="font-size: 1.2rem;"></i>
+                            <strong>Export Limit</strong>
+                        </div>
+                        <p class="mb-0 mt-2">You can only export your data once per day for security reasons.</p>
+                    </div>
+
+                    <!-- Agreement Section -->
+                    <div class="export-agreement p-3 border rounded">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="export_agreement" id="exportAgreement" value="1">
+                            <label class="form-check-label" for="exportAgreement">
+                                <strong>I understand the risks</strong> - I acknowledge that my passwords will be decrypted and exported. I am responsible for keeping the exported file secure.
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions mt-4">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="ri-close-line"></i> Cancel
+                        </button>
+                        <button type="submit" form="exportForm" class="btn btn-primary" id="exportSubmit" disabled>
+                            <i class="ri-download-line"></i> Export Passwords
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    Export_account_data.php
+
+    <?php
+session_start();
+include "../private/db_config.php";
+include "../private/config.php";
+include "../private/encryption.php";
+
+// Security Check: Redirect if not logged in
+if (!isset($_SESSION['username'])) {
+    header('Location: ../index');
+    exit();
+}
+
+$username = $_SESSION['username'];
+$user_id = $_SESSION['id'];
+
+// Check if user agreed to terms
+if (!isset($_POST['export_agreement']) || $_POST['export_agreement'] !== '1') {
+    $_SESSION['export_error'] = "You must agree to the export terms to proceed.";
+    header('Location: userprofile');
+    exit();
+}
+
+// Check if user has already exported today
+$today = date('Y-m-d');
+if (isset($_SESSION['last_export_date']) && $_SESSION['last_export_date'] === $today) {
+    $_SESSION['export_error'] = "You can only export your data once per day. Please try again tomorrow.";
+    header('Location: userprofile');
+    exit();
+}
+
+try {
+    // Initialize encryption
+    $encryption = new Encryption();
+
+    // Fetch stored passwords data from storage table
+    $sql = "SELECT email, username, password, links, passkeys, notes, lastupdate FROM storage WHERE user_id = ?";
+    $stmt = mysqli_prepare($conn, $sql);
+    mysqli_stmt_bind_param($stmt, "i", $user_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    if ($result && mysqli_num_rows($result) > 0) {
+        // Create CSV content
+        $csv_data = "Website/Service,Username,Password,URL,Passkeys,Notes,Last Updated\n";
+        
+        while ($row = mysqli_fetch_assoc($result)) {
+            try {
+                // Decrypt all the data
+                $decrypted_email = $encryption->decrypt($row['email']);
+                $decrypted_username = $encryption->decrypt($row['username']);
+                $decrypted_password = $encryption->decrypt($row['password']);
+                $decrypted_links = $encryption->decrypt($row['links']);
+                $decrypted_passkeys = $encryption->decrypt($row['passkeys']);
+                $decrypted_notes = $encryption->decrypt($row['notes']);
+                
+                // Use email as website/service name, or links if email is empty
+                $website_service = !empty($decrypted_email) ? $decrypted_email : $decrypted_links;
+                if (empty($website_service)) {
+                    $website_service = "Unknown Service";
+                }
+                
+                // Escape CSV fields
+                $csv_data .= '"' . str_replace('"', '""', $website_service) . '",';
+                $csv_data .= '"' . str_replace('"', '""', $decrypted_username) . '",';
+                $csv_data .= '"' . str_replace('"', '""', $decrypted_password) . '",';
+                $csv_data .= '"' . str_replace('"', '""', $decrypted_links) . '",';
+                $csv_data .= '"' . str_replace('"', '""', $decrypted_passkeys) . '",';
+                $csv_data .= '"' . str_replace('"', '""', $decrypted_notes) . '",';
+                $csv_data .= '"' . $row['lastupdate'] . '"';
+                $csv_data .= "\n";
+            } catch (Exception $e) {
+                error_log("Decryption error for storage row: " . $e->getMessage());
+                continue;
+            }
+        }
+
+        // Set headers for CSV download
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="wolfallet_stored_passwords_' . date('Y-m-d') . '.csv"');
+        header('Content-Length: ' . strlen($csv_data));
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        
+        // Output CSV data
+        echo $csv_data;
+
+        // Update last export date in session
+        $_SESSION['last_export_date'] = $today;
+        exit();
+        
+    } else {
+        // If no data found, redirect back with error
+        $_SESSION['export_error'] = "No stored passwords found to export.";
+        header('Location: userprofile');
+        exit();
+    }
+    
+} catch (Exception $e) {
+    $_SESSION['export_error'] = "Error exporting data. Please try again.";
+    error_log("Export error: " . $e->getMessage());
+    header('Location: userprofile');
+    exit();
+}
+?>

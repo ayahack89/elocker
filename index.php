@@ -129,7 +129,7 @@ if (isset($_POST['submit'])) {
                 </button>
 
                 <p class="register-link">
-                    Don't have an account? <a href="auth/register.php">Register now</a>
+                    Don't have an account? <a href="auth/register">Register now</a>
                 </p>
             </form>
         </div>

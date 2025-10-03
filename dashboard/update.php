@@ -6,13 +6,12 @@ include "../private/encryption.php";
 
 // Security Check: Redirect if not logged in
 if (!isset($_SESSION['username'])) {
-    header('Location: ../index'); // CHANGED: removed .php
+    header('Location: ../index');
     exit();
 }
 
 $username = $_SESSION['username'];
 $user_id = $_SESSION['id'];
-$get_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $message = '';
 $message_type = '';
 $data = null;
@@ -32,47 +31,61 @@ $categories = [
     'Others' => 'Others'
 ];
 
-// Debug: Check if ID is received
-if ($get_id === 0) {
-    die("Error: No ID specified in URL");
-}
-
 try {
     $encryption = new Encryption();
     
-    // --- Fetch existing data securely using user_id (not username) ---
-    $sql_fetch = "SELECT * FROM `storage` WHERE id = ? AND user_id = ?";
-    $stmt_fetch = mysqli_prepare($conn, $sql_fetch);
-    mysqli_stmt_bind_param($stmt_fetch, "ii", $get_id, $user_id);
-    mysqli_stmt_execute($stmt_fetch);
-    $result = mysqli_stmt_get_result($stmt_fetch);
-
-    if ($result && mysqli_num_rows($result) === 1) {
-        $data = mysqli_fetch_assoc($result);
-        
-        // Debug: Check if data is fetched
-        if (!$data) {
-            die("Error: Failed to fetch data for ID: $get_id");
-        }
-
-        // Decrypt all fields for display in the form
-        $data['email'] = $encryption->decrypt($data['email']);
-        $data['links'] = $encryption->decrypt($data['links']);
-        $data['decrypted_password'] = $encryption->decrypt($data['password']);
-        $data['passkeys'] = $encryption->decrypt($data['passkeys']);
-        $data['notes'] = $encryption->decrypt($data['notes']);
-        
-        // Handle decryption failures
-        $data['email'] = $data['email'] ?: '';
-        $data['links'] = $data['links'] ?: '';
-        $data['decrypted_password'] = $data['decrypted_password'] ?: '';
-        $data['passkeys'] = $data['passkeys'] ?: '';
-        $data['notes'] = $data['notes'] ?: '';
-        
-    } else {
-        // No record found for this user with this ID
-        $message = "Record not found or you don't have permission to edit it.";
+    // --- Get and decrypt the encrypted ID from URL ---
+    $encrypted_id = isset($_GET['token']) ? trim($_GET['token']) : '';
+    
+    if (empty($encrypted_id)) {
+        $message = "Invalid request. No token provided.";
         $message_type = 'alert-danger';
+    } else {
+        // Decrypt the ID
+        $get_id = $encryption->decrypt($encrypted_id);
+        
+        // Validate that we got a valid integer ID
+        if (!is_numeric($get_id) || $get_id <= 0) {
+            $message = "Invalid token provided.";
+            $message_type = 'alert-danger';
+        } else {
+            $get_id = (int)$get_id;
+            
+            // --- Fetch existing data securely using user_id (not username) ---
+            $sql_fetch = "SELECT * FROM `storage` WHERE id = ? AND user_id = ?";
+            $stmt_fetch = mysqli_prepare($conn, $sql_fetch);
+            mysqli_stmt_bind_param($stmt_fetch, "ii", $get_id, $user_id);
+            mysqli_stmt_execute($stmt_fetch);
+            $result = mysqli_stmt_get_result($stmt_fetch);
+
+            if ($result && mysqli_num_rows($result) === 1) {
+                $data = mysqli_fetch_assoc($result);
+                
+                // Debug: Check if data is fetched
+                if (!$data) {
+                    die("Error: Failed to fetch data for ID: $get_id");
+                }
+
+                // Decrypt all fields for display in the form
+                $data['email'] = $encryption->decrypt($data['email']);
+                $data['links'] = $encryption->decrypt($data['links']);
+                $data['decrypted_password'] = $encryption->decrypt($data['password']);
+                $data['passkeys'] = $encryption->decrypt($data['passkeys']);
+                $data['notes'] = $encryption->decrypt($data['notes']);
+                
+                // Handle decryption failures
+                $data['email'] = $data['email'] ?: '';
+                $data['links'] = $data['links'] ?: '';
+                $data['decrypted_password'] = $data['decrypted_password'] ?: '';
+                $data['passkeys'] = $data['passkeys'] ?: '';
+                $data['notes'] = $data['notes'] ?: '';
+                
+            } else {
+                // No record found for this user with this ID
+                $message = "Record not found or you don't have permission to edit it.";
+                $message_type = 'alert-danger';
+            }
+        }
     }
 } catch (Exception $e) {
     $message = "System error: " . $e->getMessage();
@@ -101,6 +114,9 @@ if (isset($_POST['submit']) && $data) {
             $encrypted_passkeys = $encryption->encrypt($get_user_passkeys);
             $encrypted_notes = $encryption->encrypt($get_user_notes);
             
+            // Get the original ID from the data
+            $original_id = $data['id'];
+            
             // Update query using prepared statements (including category)
             $sql_update = "UPDATE `storage` SET 
                           category = ?,
@@ -120,12 +136,12 @@ if (isset($_POST['submit']) && $data) {
                 $encrypted_password, 
                 $encrypted_passkeys, 
                 $encrypted_notes, 
-                $get_id, 
+                $original_id, 
                 $user_id
             );
 
             if (mysqli_stmt_execute($stmt_update)) {
-                header("Location: managepassword?status=updated"); // CHANGED: removed .php
+                header("Location: managepassword?status=updated");
                 exit();
             } else {
                 $message = "Database error: " . mysqli_error($conn);
@@ -143,7 +159,7 @@ if (isset($_POST['submit']) && $data) {
 
 // If no data found and we're not processing a form, redirect
 if (!$data && !isset($_POST['submit'])) {
-    header('Location: managepassword'); // CHANGED: removed .php
+    header('Location: managepassword');
     exit();
 }
 ?>
@@ -154,86 +170,6 @@ if (!$data && !isset($_POST['submit'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php include "../include/cdn.php"; ?>
     <link rel="stylesheet" href="../css/style.css">
-    <style>
-        .password-cell-form {
-            position: relative;
-        }
-        .toggle-password-form {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #6c757d;
-            z-index: 5;
-        }
-        .toggle-password-form:hover {
-            color: #495057;
-        }
-        .login-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-        .login-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .login-header h2 {
-            color: var(--text-light);
-            margin-bottom: 0.5rem;
-        }
-        .login-header p {
-            color: var(--text-muted);
-        }
-        .form-label {
-            color: var(--text-light);
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-        .form-control {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-light);
-            padding: 12px 16px;
-        }
-        .form-control:focus {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: var(--primary-color);
-            color: var(--text-light);
-            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.2);
-        }
-        .form-control:disabled {
-            background: rgba(255, 255, 255, 0.03);
-            color: var(--text-muted);
-        }
-        .back-link {
-            text-align: center;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .back-link a {
-            color: var(--text-muted);
-            text-decoration: none;
-        }
-        .back-link a:hover {
-            color: var(--primary-color);
-        }
-        .category-badge-edit {
-            display: inline-block;
-            padding: 6px 12px;
-            background: rgba(13, 110, 253, 0.15);
-            color: var(--primary-color);
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            border: 1px solid rgba(13, 110, 253, 0.3);
-            margin-left: 10px;
-        }
-    </style>
     <title>Elocker - Edit Password</title>
 </head>
 <body class="background text-light">
@@ -330,7 +266,7 @@ if (!$data && !isset($_POST['submit'])) {
                     <?php endif; ?>
 
                     <p class="back-link">
-                        <a href="managepassword"><i class="ri-arrow-left-line"></i> Back to Manage Passwords</a> <!-- CHANGED: removed .php -->
+                        <a href="managepassword"><i class="ri-arrow-left-line"></i> Back to Manage Passwords</a>
                     </p>
                 </div>
             </div>
