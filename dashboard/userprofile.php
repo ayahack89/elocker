@@ -1,8 +1,8 @@
-<?php 
+<?php
 session_start();
 include "../private/db_config.php";
 include "../private/config.php";
-include "../private/encryption.php"; 
+include "../private/encryption.php";
 
 // Security Check: Redirect if not logged in
 if (!isset($_SESSION['username'])) {
@@ -16,14 +16,14 @@ $encryption = new Encryption();
 // Handle account deletion
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_account'])) {
     $username = $_SESSION['username'];
-    
+
     try {
         // Begin transaction
         $conn->begin_transaction();
-        
+
         // Delete user data from all tables
         $tables = ['feedback', 'newsletter_subscriptions']; // Add other tables as needed
-        
+
         foreach ($tables as $table) {
             $delete_sql = "DELETE FROM $table WHERE username = ?";
             $stmt = $conn->prepare($delete_sql);
@@ -33,15 +33,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_account'])) {
             $stmt->execute();
             $stmt->close();
         }
-        
+
         // Commit transaction
         $conn->commit();
-        
+
         // Destroy session and redirect
         session_destroy();
         header('Location: ../index?account_deleted=true');
         exit();
-        
     } catch (Exception $e) {
         // Rollback transaction on error
         $conn->rollback();
@@ -56,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_feedback'])) {
     $real_name = isset($_POST['real_name']) ? trim($_POST['real_name']) : '';
     $email_id = isset($_POST['email_id']) ? trim($_POST['email_id']) : '';
     $feedback_opinion = isset($_POST['feedback_opinion']) ? trim($_POST['feedback_opinion']) : '';
-    
+
     if (!empty($feedback_opinion)) {
         try {
             // Encrypt the data before inserting
@@ -64,12 +63,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_feedback'])) {
             $encrypted_real_name = !empty($real_name) ? $encryption->encrypt($real_name) : '';
             $encrypted_email_id = !empty($email_id) ? $encryption->encrypt($email_id) : '';
             $encrypted_feedback = $encryption->encrypt($feedback_opinion);
-            
+
             $sql = "INSERT INTO feedback (username, real_name, email_id, feedback_oppinion, feedback_time) 
                     VALUES (?, ?, ?, ?, NOW())";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("ssss", $encrypted_username, $encrypted_real_name, $encrypted_email_id, $encrypted_feedback);
-            
+
             if ($stmt->execute()) {
                 $feedback_success = "Thank you for your feedback!";
                 // Clear form fields
@@ -90,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_feedback'])) {
 // Handle newsletter subscription
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subscribe_newsletter'])) {
     $newsletter_email = isset($_POST['newsletter_email']) ? trim($_POST['newsletter_email']) : '';
-    
+
     if (!empty($newsletter_email) && filter_var($newsletter_email, FILTER_VALIDATE_EMAIL)) {
         // Check if email already exists
         $check_sql = "SELECT id FROM newsletter_subscriptions WHERE email = ?";
@@ -98,18 +97,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subscribe_newsletter'
         $check_stmt->bind_param("s", $newsletter_email);
         $check_stmt->execute();
         $check_result = $check_stmt->get_result();
-        
+
         if ($check_result->num_rows > 0) {
             $newsletter_error = "You are already subscribed to our newsletter!";
         } else {
             // Encrypt username before storing
             $encrypted_username = $encryption->encrypt($_SESSION['username']);
-            
+
             $sql = "INSERT INTO newsletter_subscriptions (email, username, subscribed_at) 
                     VALUES (?, ?, NOW())";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("ss", $newsletter_email, $encrypted_username);
-            
+
             if ($stmt->execute()) {
                 $newsletter_success = "Successfully subscribed to newsletter!";
                 unset($_POST['newsletter_email']);
@@ -133,13 +132,13 @@ try {
     $debug_stmt = $conn->prepare($debug_sql);
     $debug_stmt->execute();
     $debug_result = $debug_stmt->get_result();
-    
+
     $all_records = [];
     $matching_records = [];
-    
+
     while ($debug_row = $debug_result->fetch_assoc()) {
         $all_records[] = $debug_row;
-        
+
         // Try to decrypt each username to find matches
         try {
             $decrypted_username = $encryption->decrypt($debug_row['username']);
@@ -151,7 +150,7 @@ try {
         }
     }
     $debug_stmt->close();
-    
+
     // Now fetch only the matching records for display
     if (!empty($matching_records)) {
         foreach ($matching_records as $record) {
@@ -159,7 +158,7 @@ try {
                 // Decrypt the feedback content and real name
                 $decrypted_feedback = $encryption->decrypt($record['feedback_oppinion']);
                 $decrypted_real_name = !empty($record['real_name']) ? $encryption->decrypt($record['real_name']) : '';
-                
+
                 $user_feedback[] = [
                     'real_name' => $decrypted_real_name,
                     'feedback_oppinion' => $decrypted_feedback,
@@ -175,7 +174,6 @@ try {
             }
         }
     }
-    
 } catch (Exception $e) {
     error_log("Database error fetching feedback: " . $e->getMessage());
 }
@@ -197,6 +195,7 @@ if ($table_result->num_rows == 0) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -205,9 +204,10 @@ if ($table_result->num_rows == 0) {
     <link rel="stylesheet" href="../css/layout.css">
     <title>Wolfallet - User Profile</title>
 </head>
+
 <body class="background text-light">
     <?php include "../include/navbar.php"; ?>
-    
+
     <main class="container py-5">
         <!-- Back Link at Top -->
         <div class="back-link-top">
@@ -220,15 +220,15 @@ if ($table_result->num_rows == 0) {
                     <h1>User Profile</h1>
                     <p class="dashboard-header-sub">Manage your feedback, subscriptions, and account preferences</p>
                 </div>
-  
 
-<!-- *** This feature on hold ***  -->
 
-<!-- <button type="button" class="btn export-keys-btn" data-bs-toggle="modal" data-bs-target="#exportModal">
+                <!-- *** This feature on hold ***  -->
+
+                <!-- <button type="button" class="btn export-keys-btn" data-bs-toggle="modal" data-bs-target="#exportModal">
     <i class="ri-download-line"></i> Export Stored Passwords
-</button> --> 
+</button> -->
 
-<!-- *** This feature on hold ***  -->
+                <!-- *** This feature on hold ***  -->
 
             </div>
         </div>
@@ -241,8 +241,15 @@ if ($table_result->num_rows == 0) {
                         <i class="ri-information-line"></i>
                     </div>
                     <h3 class="card-title">About Wolfallet</h3>
-                    <p class="card-text">Wolfallet is a secure password management solution designed to help you store and manage your credentials safely. With military-grade encryption and an intuitive interface, Wolfallet ensures your sensitive information remains protected while providing easy access when you need it.</p>
-                    <p class="card-text">Our mission is to simplify digital security for everyone, making strong password practices accessible and manageable.</p>
+                    <p class="card-text">Wolfallet is your personal security vault simple, powerful, and built for real life. I believe managing passwords shouldn't feel like rocket science. That's why I've created a solution that combines end-to-end strong encryption with an simple interface, you'll wonder why password management was ever complicated.</p>
+
+                    <p class="card-text">My mission? To make digital security something you actually want to use. Not something you have to use.</p>
+
+                    <p class="card-text">Nobody knows your needs better than you. That's exactly why I built Wolfallet.. to work the way you work, to fit into your life, not the other way around.</p>
+
+                    <p class="card-text">I'm launching the beta soon, and I want you to be part of this journey from day one. Every founding user gets lifetime access completely free for the first 30 days, and then it stays with you, forever. No catches, no fine print.</p>
+
+                    <p class="card-text">Your voice matters to me. I'm building this with your feedback in mind, so share your thoughts, your concerns, your ideas. Run into trouble? Need help? I'm here. Real person, real support. Thankyou.</p>
                 </div>
             </div>
 
@@ -258,7 +265,7 @@ if ($table_result->num_rows == 0) {
                     <?php elseif (isset($feedback_error)): ?>
                         <div class="alert alert-danger"><?php echo $feedback_error; ?></div>
                     <?php endif; ?>
-                    
+
                     <form method="POST" action="">
                         <div class="mb-3">
                             <label for="real_name" class="form-label">Your Name (Optional)</label>
@@ -289,8 +296,8 @@ if ($table_result->num_rows == 0) {
                     <?php elseif (isset($newsletter_error)): ?>
                         <div class="alert alert-danger"><?php echo $newsletter_error; ?></div>
                     <?php endif; ?>
-                    
-                    <p class="card-text">Subscribe to our newsletter to receive updates about new features, security tips, and product announcements.</p>
+
+                    <p class="card-text">Subscribe to the newsletter to receive updates about new features, security tips, and product announcements.</p>
                     <form method="POST" action="">
                         <div class="mb-3">
                             <input type="email" class="form-control" name="newsletter_email" placeholder="Enter your email address" required value="<?php echo isset($_POST['newsletter_email']) ? htmlspecialchars($_POST['newsletter_email']) : ''; ?>">
@@ -307,7 +314,7 @@ if ($table_result->num_rows == 0) {
                         <i class="ri-history-line"></i>
                     </div>
                     <h3 class="card-title">Your Previous Feedback</h3>
-                    
+
                     <?php if (empty($user_feedback)): ?>
                         <div class="empty-state">
                             <i class="ri-feedback-line"></i>
@@ -323,7 +330,7 @@ if ($table_result->num_rows == 0) {
                                         </div>
                                         <div class="user-info">
                                             <h6 class="user-name">
-                                                <?php 
+                                                <?php
                                                 // Display real name if available, otherwise show Anonymous
                                                 if (!empty($feedback['real_name'])) {
                                                     echo htmlspecialchars($feedback['real_name']);
@@ -353,21 +360,21 @@ if ($table_result->num_rows == 0) {
                     </div>
                     <h3 class="card-title">Policies & Information</h3>
                     <p class="card-text">Important legal documents and policies for your reference.</p>
-                    
+
                     <div class="policy-cards">
                         <div class="policy-card" data-bs-toggle="modal" data-bs-target="#termsModal">
                             <div class="policy-icon">
                                 <i class="ri-file-text-line"></i>
                             </div>
                             <h4>Terms & Conditions</h4>
-                            <p>Read our terms of service and usage policies</p>
+                            <p>Read terms of service and usage policies</p>
                         </div>
                         <div class="policy-card" data-bs-toggle="modal" data-bs-target="#privacyModal">
                             <div class="policy-icon">
                                 <i class="ri-shield-keyhole-line"></i>
                             </div>
                             <h4>Privacy Policy</h4>
-                            <p>Learn how we protect and handle your data</p>
+                            <p>Learn how I protect and handle your data</p>
                         </div>
                     </div>
                 </div>
@@ -403,15 +410,15 @@ if ($table_result->num_rows == 0) {
                     <?php if (isset($delete_error)): ?>
                         <div class="alert alert-danger"><?php echo $delete_error; ?></div>
                     <?php endif; ?>
-                    
+
                     <div class="warning-text">
                         <i class="ri-error-warning-line"></i> Warning: This action is irreversible!
                     </div>
-                    
+
                     <p>You cannot undo or backup your data anymore. This action is permanent.</p>
-                    
+
                     <p>If you have any query or facing any issue, please <a href="contact" class="support-link">contact support</a> before proceeding.</p>
-                    
+
                     <div class="modal-actions">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <form method="POST" action="" style="display: inline;">
@@ -434,29 +441,47 @@ if ($table_result->num_rows == 0) {
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <h5>Acceptance of Terms</h5>
-                    <p>By accessing and using Wolfallet, you accept and agree to be bound by the terms and provision of this agreement.</p>
+                    <h5>Welcome to Wolfallet</h5>
+                    <p>By using Wolfallet, you're agreeing to these terms. I've kept them straightforward because I believe you deserve clarity, not legal jargon.</p>
 
-                    <h5>Usage Guidelines</h5>
-                    <p>Wolfallet is a password management tool. You are responsible for keeping your master password safe and secure. We cannot recover your password if lost.</p>
+                    <h5>Your Responsibility</h5>
+                    <p>Wolfallet is a password management tool built to keep your credentials safe. Your master password is the key to everything keep it secure and memorable. I've designed the system so that only you can access your data, which means if you lose your master password, I cannot recover it for you. Please store it safely.</p>
+
+                    <h5>How I Protect Your Data</h5>
+                    <p>Your vault is encrypted end-to-end using industry-standard encryption. I cannot see, access, or decrypt your stored passwords. Your data belongs to you, and only you hold the key.</p>
+
+                    <h5>Beta Program & Pricing</h5>
+                    <p>Wolfallet is currently in beta and completely free for anyone who signs up within the first 30 days of launch. Your lifetime access is locked in no expiration, no future charges for founding users. After the beta period, I'll introduce a paid subscription model for new users. Pricing details will be announced before the transition.</p>
 
                     <h5>Refund Policy</h5>
-                    <p>All payments made for Wolfallet are non-refundable. Once you complete your purchase, we cannot issue refunds under any circumstances.</p>
+                    <p>Once a payment is processed (for future paid plans), all sales are final and non-refundable. I'm committed to delivering value, but please make sure Wolfallet fits your needs before subscribing.</p>
 
                     <h5>Account Recovery</h5>
-                    <p>Wolfallet is designed so that only you can access your encrypted vault. For security reasons, if you forget your master password, we cannot decrypt your stored data.</p>
+                    <p>Because of the strong encryption I use, if you forget your master password, there's no way for me to reset it or recover your data. Security comes first, but that means you need to remember your password or store it somewhere safe.</p>
 
-                    <h5>Data Encryption</h5>
-                    <p>Passwords are encrypted client-side using AES-256 before being sent to our servers. The encryption/decryption key is derived from your master password.</p>
+                    <h5>Cross-Device Sync</h5>
+                    <p>Sign in from any device, and your encrypted vault syncs automatically. Your passwords follow you wherever you go securely.</p>
 
-                    <h5>Cross-Device Access</h5>
-                    <p>Once signed in on another device, your encrypted vault syncs across devices so you can access your passwords anywhere.</p>
+                    <h5>Exporting Your Data</h5>
+                    <p>You own your data. You can export your entire vault as a secure .csv file anytime through the Manage Passwords section. Take it with you if you ever decide to leave.</p>
 
-                    <h5>Data Export</h5>
-                    <p>You can export your vault data as a secure .csv file through the Manage Passwords section.</p>
+                    <h5>Deleting Your Account</h5>
+                    <p>If you want to delete your account, head to User Profile → Delete Profile. This will permanently erase all your stored data from my servers. This action cannot be undone, so please be certain before proceeding.</p>
 
-                    <h5>Account Deletion</h5>
-                    <p>To delete your account and remove all stored data, go to User profile → Delete Profile. This action is irreversible.</p>
+                    <h5>Service Availability</h5>
+                    <p>I work hard to keep Wolfallet running smoothly, but like any service, there may be occasional downtime for maintenance or unexpected issues. I'll do my best to notify you in advance and resolve problems quickly.</p>
+
+                    <h5>Changes to These Terms</h5>
+                    <p>As Wolfallet grows, I may need to update these terms. If I make significant changes, I'll notify you via email or through the app. Continuing to use the service means you accept the updated terms.</p>
+
+                    <h5>Limitation of Liability</h5>
+                    <p>I've built Wolfallet with security and reliability in mind, but I cannot guarantee it will be error-free or uninterrupted. You use Wolfallet at your own risk. I'm not liable for any data loss, security breaches, or damages resulting from your use of the service so please keep backups of critical information.</p>
+
+                    <h5>Contact & Support</h5>
+                    <p>Got questions? Facing issues? Want to share feedback? I'm here for you. Reach out through the contact form or support section, and I'll get back to you as quickly as possible.</p>
+
+                    <h5>Final Note</h5>
+                    <p>I built Wolfallet because I believe everyone deserves simple, strong security. Thank you for trusting me with your digital safety. Let's build something great together.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -465,7 +490,7 @@ if ($table_result->num_rows == 0) {
         </div>
     </div>
 
- 
+
     <!-- Privacy Policy Modal -->
     <div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -475,26 +500,73 @@ if ($table_result->num_rows == 0) {
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <h5>Information Collection</h5>
-                    <p>Wolfallet collects minimal information necessary to provide our service. We store encrypted passwords and basic usage statistics.</p>
+                    <h5>Your Privacy Matters</h5>
+                    <p>I built Wolfallet with privacy at its core. This policy explains what data I collect, how I protect it, and what rights you have. I believe in transparency, so I've written this in plain language.</p>
 
-                    <h5>Data Encryption</h5>
-                    <p>All sensitive data is encrypted using AES-256-CBC encryption before being stored in our databases.</p>
+                    <h5>What Information I Collect</h5>
+                    <p>I collect only what's necessary to make Wolfallet work for you:</p>
+                    <p><strong>Account Information:</strong> Your email address and account credentials (your master password is never stored only a secure hash).</p>
+                    <p><strong>Encrypted Vault Data:</strong> Your stored passwords and credentials, fully encrypted before they ever reach my servers.</p>
+                    <p><strong>Usage Data:</strong> Basic information like login times, device types, and feature usage to improve the service and troubleshoot issues.</p>
+                    <p><strong>Payment Information:</strong> If you subscribe to a paid plan in the future, payment details are processed through secure third-party payment processors. I never see or store your full credit card information.</p>
 
-                    <h5>Data Usage</h5>
-                    <p>We use your information to provide, maintain, and improve our services and to send you important service updates.</p>
+                    <h5>How I Protect Your Data</h5>
+                    <p>Security isn't just a feature it's the foundation of Wolfallet:</p>
+                    <p><strong>End-to-End Encryption:</strong> Your vault is encrypted using AES-256-CBC encryption on your device before it's sent to my servers. I cannot decrypt or access your passwords only you hold the key.</p>
+                    <p><strong>Zero-Knowledge Architecture:</strong> Your master password never leaves your device in plain text. I store only a cryptographic hash, which means even I can't see what's inside your vault.</p>
+                    <p><strong>Secure Transmission:</strong> All data transfers between your device and my servers use TLS/SSL encryption.</p>
+                    <p><strong>Regular Security Audits:</strong> I continuously monitor and update security measures to protect against emerging threats.</p>
 
-                    <h5>Data Sharing</h5>
-                    <p>We do not sell, trade, or rent your personal identification information to others.</p>
+                    <h5>How I Use Your Information</h5>
+                    <p>I use your data solely to:</p>
+                    <p>• Provide and maintain Wolfallet's services<br>
+                        • Sync your encrypted vault across your devices<br>
+                        • Send important service updates, security alerts, or account notifications<br>
+                        • Improve features and fix bugs based on usage patterns<br>
+                        • Respond to your support requests and feedback</p>
 
-                    <h5>Security Measures</h5>
-                    <p>We implement appropriate security measures to protect against unauthorized access to your data.</p>
+                    <h5>What I Don't Do With Your Data</h5>
+                    <p>Let me be clear: I will never sell, rent, trade, or share your personal information with third parties for marketing purposes. Your data is yours, not a product.</p>
+                    <p>The only exception is if I'm legally required to disclose information by law enforcement or court order—and even then, your encrypted vault data remains inaccessible to everyone, including me.</p>
+
+                    <h5>Third-Party Services</h5>
+                    <p>Wolfallet uses a few trusted third-party services to function:</p>
+                    <p><strong>Hosting Providers:</strong> Secure cloud infrastructure to store encrypted data.<br>
+                        <strong>Payment Processors:</strong> For handling subscriptions (when applicable).<br>
+                        <strong>Analytics Tools:</strong> Anonymous usage statistics to improve the app.
+                    </p>
+                    <p>These partners are bound by strict confidentiality agreements and cannot access your encrypted vault data.</p>
 
                     <h5>Data Retention</h5>
-                    <p>We retain your personal information only for as long as necessary to provide you with our services.</p>
+                    <p>I keep your data only as long as your account is active. If you delete your account, all your data—including your encrypted vault is permanently removed from my servers within 30 days. Backups are securely wiped after this period.</p>
 
-                    <h5>Your Rights</h5>
-                    <p>You have the right to access, correct, or delete your personal information.</p>
+                    <h5>Your Rights & Control</h5>
+                    <p>You're in control of your data. You have the right to:</p>
+                    <p>• <strong>Access:</strong> View what data I store about you.<br>
+                        • <strong>Export:</strong> Download your vault data as a .csv file anytime.<br>
+                        • <strong>Correct:</strong> Update your account information whenever you need.<br>
+                        • <strong>Delete:</strong> Permanently erase your account and all associated data through User Profile → Delete Profile.</p>
+
+                    <h5>Cookies & Tracking</h5>
+                    <p>Wolfallet uses minimal cookies to keep you logged in and remember your preferences. I don't use intrusive tracking or sell your browsing data to advertisers. You can manage cookie settings in your browser, but disabling them may affect functionality.</p>
+
+                    <h5>Data Breach Protocol</h5>
+                    <p>In the unlikely event of a security breach, I'll notify you immediately via email and provide clear guidance on protective steps. Thanks to zero-knowledge encryption, even in a breach scenario, your vault data remains secure and unreadable.</p>
+
+                    <h5>International Users</h5>
+                    <p>If you're using Wolfallet from outside my hosting region, your data may be transferred and stored in data centers located in different countries. Rest assured, your data is always encrypted and protected under the same strict privacy standards, regardless of location.</p>
+
+                    <h5>Changes to This Policy</h5>
+                    <p>As Wolfallet evolves, I may update this privacy policy. I'll notify you of significant changes via email or through the app. Your continued use of the service means you accept the updated policy.</p>
+
+                    <h5>Children's Privacy</h5>
+                    <p>Wolfallet is not intended for users under 13 years old. I do not knowingly collect personal information from children. If you believe a child has created an account, please contact me immediately so I can delete it.</p>
+
+                    <h5>Contact Me</h5>
+                    <p>Have questions about privacy? Want to exercise your data rights? I'm here to help. Reach out through the support section, and I'll respond as quickly as possible.</p>
+
+                    <h5>My Commitment to You</h5>
+                    <p>Privacy isn't an afterthought it's why Wolfallet exists. I'm committed to protecting your data with the same care I'd want for my own. Thank you for trusting me with your security.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -504,7 +576,7 @@ if ($table_result->num_rows == 0) {
     </div>
 
     <script>
-       // Real-time feedback updates
+        // Real-time feedback updates
         document.addEventListener('DOMContentLoaded', function() {
             // Auto-hide alerts after 5 seconds
             const alerts = document.querySelectorAll('.alert');
@@ -516,7 +588,7 @@ if ($table_result->num_rows == 0) {
                     }, 300);
                 }, 5000);
             });
-            
+
             // Delete account confirmation
             const deleteForm = document.querySelector('form[method="POST"] button[name="delete_account"]');
             if (deleteForm) {
@@ -526,11 +598,11 @@ if ($table_result->num_rows == 0) {
                     }
                 });
             }
-            
+
             // Export agreement checkbox validation
             const exportAgreement = document.getElementById('exportAgreement');
             const exportSubmit = document.getElementById('exportSubmit');
-            
+
             if (exportAgreement && exportSubmit) {
                 exportAgreement.addEventListener('change', function() {
                     exportSubmit.disabled = !this.checked;
@@ -544,11 +616,11 @@ if ($table_result->num_rows == 0) {
                     }
                 });
             }
-            
+
             // Reset export form when modal is closed
             const exportModal = document.getElementById('exportModal');
             if (exportModal) {
-                exportModal.addEventListener('hidden.bs.modal', function () {
+                exportModal.addEventListener('hidden.bs.modal', function() {
                     const exportAgreement = document.getElementById('exportAgreement');
                     const exportSubmit = document.getElementById('exportSubmit');
                     if (exportAgreement) {
@@ -577,4 +649,5 @@ if ($table_result->num_rows == 0) {
         });
     </script>
 </body>
+
 </html>

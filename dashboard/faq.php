@@ -57,7 +57,7 @@ if (!isset($_SESSION['username'])) {
                             <div id="flush-collapseTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo" data-bs-parent="#faqAccordion">
                                 <div class="accordion-body">
                                     <h5>Yes, your security is our top priority.</h5>
-                                    <p>All credentials you store are protected with strong <strong>AES-256-CBC encryption</strong> before they are saved in our database. This means your sensitive information is unreadable to anyone without the secret key. We are committed to providing a secure and trustworthy environment for your data.</p>
+                                    <p>All credentials you store are protected with strong <strong>AES-256-CBC encryption</strong> before they are saved in our database. This means your sensitive information is unreadable to anyone without the secret key. I committed to providing a secure and trustworthy environment for your data.</p>
                                 </div>
                             </div>
                         </div>
@@ -70,8 +70,8 @@ if (!isset($_SESSION['username'])) {
                             </h2>
                             <div id="flush-collapseThree" class="accordion-collapse collapse" aria-labelledby="flush-headingThree" data-bs-parent="#faqAccordion">
                                 <div class="accordion-body">
-                                    <h5>We're here to help.</h5>
-                                    <p>For any other problems, security concerns, or inquiries, please navigate to the <a href="contact.php" class="faq-link">Customer Support</a> page from your dashboard. Our team will promptly assist you with any issues you may have.</p>
+                                    <h5>I'm here to help.</h5>
+                                    <p>For any other problems, security concerns, or inquiries, please navigate to the <a href="contact.php" class="faq-link">Customer Support</a> page from your dashboard. I will promptly assist you with any issues you may have.</p>
                                 </div>
                             </div>
                         </div>
@@ -86,7 +86,8 @@ if (!isset($_SESSION['username'])) {
                             <div id="flush-collapseFour" class="accordion-collapse collapse" aria-labelledby="flush-headingFour" data-bs-parent="#faqAccordion">
                                 <div class="accordion-body">
                                     <h5>Refunds and billing</h5>
-                                    <p>All payments made for Wolfallet are non-refundable. Once you complete your purchase, we cannot issue refunds under any circumstances. However, your satisfaction and security are our top priority. If you face any issues with the service, please contact our <a href="contact" class="faq-link">Customer Support</a> team immediately, and we will make every effort to resolve your problem within 24 hours.</p>
+                                    <!-- <p>All payments made for Wolfallet are non-refundable. Once you complete your purchase, we cannot issue refunds under any circumstances. However, your satisfaction and security are our top priority. If you face any issues with the service, please contact our <a href="contact" class="faq-link">Customer Support</a> team immediately, and we will make every effort to resolve your problem within 24 hours.</p> -->
+                                     <p>It's on beta version, which is lifetime free for users who sign up within the next 30 days. For payment transparency, my service is currently absolutely free as I am seeking new users and actively gathering feedback. After the beta launch, I will switch to a revenue model.</p>
 
                                 </div>
                             </div>
@@ -101,7 +102,7 @@ if (!isset($_SESSION['username'])) {
                             <div id="flush-collapseFive" class="accordion-collapse collapse" aria-labelledby="flush-headingFive" data-bs-parent="#faqAccordion">
                                 <div class="accordion-body">
                                     <h5>Account recovery limitations</h5>
-                                    <p>Wolfallet is designed so that only you can access your encrypted vault. For security reasons, if you forget your master password, we cannot decrypt your stored data. However, you can export your login credentials from your profile. The process is simple—after a basic verification, an <strong>Export Credentials</strong> button will appear. Just click it to download your login data. We recommend writing down your credentials on paper or storing them securely in an offline location. Otherwise, you may need to create a new account.</p>
+                                    <p>Wolfallet is designed so that only you can access your encrypted vault. For security reasons, if you forget your master password, I cannot decrypt your stored data. However, you can export your login credentials from your profile. The process is simple—after a basic verification, an <strong>Export Credentials</strong> button will appear. Just click it to download your login data. We recommend writing down your credentials on paper or storing them securely in an offline location. Otherwise, you may need to create a new account.</p>
                                 </div></div>
                         </div>
 
@@ -114,7 +115,7 @@ if (!isset($_SESSION['username'])) {
                             <div id="flush-collapseSix" class="accordion-collapse collapse" aria-labelledby="flush-headingSix" data-bs-parent="#faqAccordion">
                                 <div class="accordion-body">
                                     <h5>Encryption & key handling</h5>
-                                    <p>Passwords are encrypted client-side using <strong>AES-256</strong> before being sent to our servers. The encryption/decryption key is derived from your master password and is never stored on our servers in plaintext. This ensures that even if the database were compromised, encrypted entries remain secure without the master key.</p>
+                                    <p>Passwords are encrypted client-side using <strong>AES-256</strong> before being sent to the servers. The encryption/decryption key is derived from your master password and is never stored on the servers in plaintext. This ensures that even if the database were compromised, encrypted entries remain secure without the master key.</p>
                                 </div>
                             </div>
                         </div>

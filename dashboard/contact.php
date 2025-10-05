@@ -31,13 +31,13 @@ if (!isset($_SESSION['username'])) {
 
                     <div class="login-header">
                         <h2>Contact Support</h2>
-                        <p>We're here to help with any questions or issues you may have.</p>
+                        <p>I am here to help with any questions or issues you may have.</p>
                     </div>
 
                     <div class="contact-info">
                         <p>For any problems, security concerns, or other inquiries, please send an email to:</p>
                         <a href="mailto:ayanabhachatterjee@gmail.com" class="contact-email-link">ayanabhachatterjee@gmail.com</a>
-                        <p class="contact-signature">- Ayanabha Chatterjee</p>
+                        <p class="contact-signature">@ayanabha08 (x formaly twitter)</p>
                     </div>
 
                     <p class="back-link">
