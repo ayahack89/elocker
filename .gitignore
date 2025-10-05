@@ -1,6 +1,7 @@
 # ignore private files and backups
 private/
-
+archive.md
+ wolfallet-feature-check.txt
 # common extras
 .env
 *.env
