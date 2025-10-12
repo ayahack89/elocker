@@ -1,1 +1,2 @@
-ELocker, your secure password manager. 
+Wolfallet - A secure password wallet.
+> Wallet with security & simplicity. 
