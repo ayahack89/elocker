@@ -20,7 +20,11 @@ RewriteRule ^(.+)\.php$ /$1 [R=301,L,NE]
 # 3. Specific rule for userprofile
 RewriteRule ^userprofile/?$ userprofile.php [L]
 
-# 4. Internally add .php extension to extensionless requests
+# 4. Handle admin routes - FIXED
+RewriteRule ^admin/?$ admin/index.php [L]
+RewriteRule ^admin/([a-zA-Z0-9_-]+)/?$ admin/$1.php [L]
+
+# 5. Internally add .php extension to extensionless requests
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME}.php -f

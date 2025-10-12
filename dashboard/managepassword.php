@@ -165,6 +165,21 @@ function getTimeAgo($timestamp)
         }
     }
 }
+
+// Function to format URL with proper protocol
+function formatUrl($url) {
+    if (empty($url)) {
+        return '';
+    }
+    
+    // Check if URL already has a protocol or is a special protocol
+    if (preg_match('/^(https?:\/\/|ftp:\/\/|mailto:|tel:|#|\/\/)/i', $url)) {
+        return $url;
+    }
+    
+    // Prepend https:// for URLs without protocol
+    return 'https://' . $url;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -295,17 +310,19 @@ function getTimeAgo($timestamp)
                                                     <?php echo htmlspecialchars($row['email']); ?>
                                                 </div>
                                             </td>
+                                            
                                             <td class="col-website">
                                                 <?php if (!empty($row['links'])): ?>
-                                                    <a href="<?php echo htmlspecialchars($row['links']); ?>" target="_blank" rel="noopener noreferrer" class="website-link" title="<?php echo htmlspecialchars($row['links']); ?>">
+                                                    <?php
+                                                    $formatted_url = formatUrl($row['links']);
+                                                    $displayLink = parse_url($formatted_url, PHP_URL_HOST) ?: $formatted_url;
+                                                    if (strlen($displayLink) > 25) {
+                                                        $displayLink = substr($displayLink, 0, 25) . '...';
+                                                    }
+                                                    ?>
+                                                    <a href="<?php echo htmlspecialchars($formatted_url); ?>" target="_blank" rel="noopener noreferrer" class="website-link" title="<?php echo htmlspecialchars($row['links']); ?>">
                                                         <i class="ri-external-link-line me-1"></i>
-                                                        <?php
-                                                        $displayLink = parse_url($row['links'], PHP_URL_HOST) ?: $row['links'];
-                                                        if (strlen($displayLink) > 25) {
-                                                            $displayLink = substr($displayLink, 0, 25) . '...';
-                                                        }
-                                                        echo htmlspecialchars($displayLink);
-                                                        ?>
+                                                        <?php echo htmlspecialchars($displayLink); ?>
                                                     </a>
                                                 <?php else: ?>
                                                     <span class="text-muted">-</span>

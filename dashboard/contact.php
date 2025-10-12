@@ -36,7 +36,7 @@ if (!isset($_SESSION['username'])) {
 
                     <div class="contact-info">
                         <p>For any problems, security concerns, or other inquiries, please send an email to:</p>
-                        <a href="mailto:ayanabhachatterjee@gmail.com" class="contact-email-link">ayanabhachatterjee@gmail.com</a>
+                        <a href="mailto:ayanabhachatterjee@gmail.com" class="contact-email-link">ayanabha.c@aol.com</a>
                         <p class="contact-signature">@ayanabha08 (x formaly twitter)</p>
                     </div>
 
